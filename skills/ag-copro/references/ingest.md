@@ -1,6 +1,8 @@
 # Ingest playbook — parsing a French AG convocation PDF
 
-Convocations d'AG run 30–60 pages and follow a regulated structure (loi du 10/07/1965, décret 67-223), but the layout varies between syndics. Anchor on landmarks, not page numbers.
+Convocations d'AG run 30–60 pages and follow a regulated structure (loi du 10/07/1965, décret 67-223), but the layout varies between syndics.
+
+**Find by landmark, record by page.** Don't *look up* facts by fixed page numbers (page 17 in Immo de France is page 22 in VPàt Immo). Do *record* the page where you found each fact, so the report can cite it back to the user — that's what the `pages` arrays in the JSON schema are for.
 
 ## Step 1 — Identify the syndic and document type
 
@@ -109,19 +111,22 @@ For each, capture the euro amount and majority article. These are usually the hi
 The output is a single interactive HTML file. **There is no markdown summary.**
 
 1. Build a JSON object matching the schema in `html-template.md`. Every value the user will read on the page comes from this object — be thorough.
-2. Compose the `briefing` array (3 to 7 items) **inside the JSON**, not as a separate prose block. Each item:
+2. **Attach `pages` to every record where the user would plausibly want to verify the figure against the original PDF.** The `Read` tool returns 1-indexed page numbers in its output; carry those over directly. Records that should carry pages: `resolutions[].pages`, `budget.pages`, `budget_lines[].pages`, `briefing[].pages`, `travaux[].pages`, `meeting.pages`, `owner.balance_pages`, `owner.fonds_alur_pages`. Always an array of ints. Omit (or use `[]`) when you genuinely cannot pinpoint the page.
+3. **Set `source.pdf_path`** to the absolute path of the source PDF. If the report is being written next to the PDF (or one directory away), also set `source.pdf_path_relative` to the path *relative to the HTML's directory* (e.g. `../resources/2-residence-du-verger-2026.pdf`). The renderer prefers the relative path so the deep links keep working when the user moves the HTML + PDF together.
+4. Compose the `briefing` array (3 to 7 items) **inside the JSON**, not as a separate prose block. Each item:
    - `title` — 4–8 words.
    - `resolutions` — array of résolution numbers as strings.
    - `article` — `"24"`, `"25"`, `"26"`, `"25-1"`, `"26-1"`, or `"—"`.
    - `body` — 1–3 sentences naming the euro amount (or "no euro amount"), the majority required, and why it matters.
    - `severity` — `"high"` (budget jump, syndic change, big-ticket travaux), `"med"` (unusual but small), `"low"` (procedural quirks).
+   - `pages` — pages backing the claim (résolution body + supporting annexe row).
    - Lead with the highest impact; the template numbers them 1, 2, 3 in display order.
-3. Read `references/html-template.html`. Substitute:
+5. Read `references/html-template.html`. Substitute:
    - `{{AG_DATA_JSON}}` → `JSON.stringify(payload, null, 2)` (preserve accents — `ensure_ascii=False` if using Python).
    - `{{LANG}}` → `data.language` (`"fr"` or `"en"`).
    - `{{YEAR}}` → first 4 chars of `data.meeting.date`.
    - `{{RESIDENCE_TITLE}}` → `data.residence` (for the `<title>` tag).
-4. Write the result to `./ag-<slug>-<year>.html` in the user's **current working directory**.
+6. Write the result to `./ag-<slug>-<year>.html` in the user's **current working directory**.
 
 Slug rules:
 - Strip accents (`é` → `e`).

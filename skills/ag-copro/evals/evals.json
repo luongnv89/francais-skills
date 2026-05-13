@@ -9,12 +9,15 @@
       "expectations": [
         "An HTML file is written to the current working directory matching the pattern ag-le-verger-a-palaiseau-2026.html (residence name and year 2026)",
         "The HTML contains a <script type=\"application/json\" id=\"ag-data\"> block with a parseable JSON object",
+        "The embedded JSON has schema_version '1.1' (or later) and source.pdf_path set to the absolute path of the source PDF",
         "The embedded JSON has residence ('LE VERGER À PALAISEAU' or similar), meeting.date '2026-06-16', syndic containing 'IMMO DE FRANCE', and owner.tantiemes 233",
         "The embedded JSON includes a budget object with n_plus_2_eur 57950 and delta_pct approximately 17.4",
         "The embedded JSON has all 19 resolutions in the resolutions[] array, with Résolution 11 amount_eur 57950 and Résolution 16 amount_eur 350",
+        "Most résolutions in the resolutions[] array carry a non-empty pages array of positive integers, and budget.pages is set to a non-empty array (page numbers may vary by extraction)",
         "The embedded JSON has a briefing[] array of 3-7 items with at least one high-severity item about the budget jump",
         "The HTML loads Tailwind CSS (cdn.tailwindcss.com) and Chart.js (cdn.jsdelivr.net) via <script> tags",
         "The HTML contains canvas elements for chart-budget, chart-resolutions, chart-lines, and chart-travaux",
+        "The rendered HTML body contains at least one 'page-chip' element citing a page in the source PDF",
         "The response identifies the meeting as 'mardi 16 juin 2026 à 19h00' at the Salle de réunion de la copropriété in Palaiseau",
         "The response states the vote-by-correspondence deadline as 12/06/2026",
         "The response highlights the budget jump from 49 350 € to 57 950 € (approximately +17 %)",
@@ -30,9 +33,11 @@
       "expectations": [
         "An HTML file is written to the current working directory matching ag-17-rue-philippe-de-dangeau-2025.html",
         "The HTML contains a <script type=\"application/json\" id=\"ag-data\"> block with a parseable JSON object",
+        "The embedded JSON has schema_version '1.1' (or later) and source.pdf_path set to the absolute path of the source PDF",
         "The embedded JSON has language 'en' (matching the English question), syndic containing 'VPàt' or 'VPAT', and meeting.date '2025-05-14'",
         "The embedded JSON has budget.n_plus_1_eur and budget.n_plus_2_eur both equal to 24000 (flat budget)",
         "The embedded JSON has multiple travaux entries or résolutions tagged 'travaux' covering chemisage colonne d'eaux usées, remplacement tronçon fonte, and ravalement",
+        "Most résolutions carry a non-empty pages array; the briefing items reference back to source pages",
         "The response identifies the meeting as Wednesday 14 May 2025 at 18:00, 52 Rue Saint Charles in Versailles",
         "The response identifies the budget as 24 000 € for both periods (flat year over year)",
         "The response flags Résolution 21 (convention d'honoraires de Maître COGNY for ~6 120 €) as a notable legal item",
@@ -63,7 +68,7 @@
         "The skill parses the JSON and filters resolutions where amount_eur is not null",
         "The response lists at least Résolution 9 (syndic, 8 292,85 €), 10 (budget actualisé), 11 (budget 2027, 57 950 €), 15 (assistance, 384 €), 16 (carrelage, 350 €), 17 (persiennes, 2 000 €)",
         "The skill does NOT re-read the source PDF",
-        "The skill cites résolution numbers"
+        "The skill cites résolution numbers, and includes the source page (from each résolution's pages array) when listing résolutions"
       ]
     }
   ]

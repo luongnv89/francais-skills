@@ -2,7 +2,7 @@
 name: ag-copro
 description: "Ingest a French Assemblée Générale (AG) PDF and generate an interactive HTML report (Tailwind + Chart.js) with meeting info, résolutions, year-over-year budget, travaux progress, and a 5-point pre-vote briefing. Don't use for non-AG French docs (acte, bail), tax files, or non-French copropriété."
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   author: francais-skills
 ---
 
@@ -32,6 +32,7 @@ That file:
 - Renders with TailwindCSS (Play CDN) and Chart.js — open in any modern browser; no build, no server.
 - Shows hero KPIs, a 5-point briefing, a filterable résolutions table, a Y-o-Y budget chart, top-variation account lines, travaux progress donut, and owner-specific cards.
 - Embeds **the full structured data** as JSON inside `<script type="application/json" id="ag-data">…</script>` — this is the source of truth for both the visualization AND for Query mode.
+- Cites the source PDF: each résolution, budget figure, briefing point, and travaux entry carries a clickable `p. N` chip that opens the original PDF at the right page (via the browser's built-in PDF viewer, `#page=N` deep link). A "PDF source" button in the header opens the whole file.
 - Supports print to PDF (`Imprimer / PDF` button hides interactive controls).
 
 There is **no separate markdown summary**. The HTML is both the report and the storage format.
@@ -82,19 +83,20 @@ The legacy folder `~/.ag-copro/summaries/` is no longer written to. If it exists
 
 Full playbook: see `references/ingest.md`. Quick version:
 
-1. Read the PDF (use the `Read` tool, paging through if >20 pages — most AGs run 30–60 pages).
+1. Read the PDF (use the `Read` tool, paging through if >20 pages — most AGs run 30–60 pages). **Track the page number every time you extract a fact** — the reader returns 1-indexed page markers, store them on the matching JSON record.
 2. Identify the syndic (Immo de France, VPàt Immo, Foncia, Loiselet & Daigremont, etc.) so layout assumptions don't bite. Look for the logo block and the contract holder in the first 2 pages.
 3. Extract the data needed to fill the JSON schema (see `references/html-template.md` for the schema):
-   - **Meeting metadata** — date, time, location, syndic, vote-by-correspondence deadline.
-   - **Resolutions** — every numbered item with its article-of-majority (Article 24/25/26/26-1) and "Sans vote" flag.
-   - **Financial Y-o-Y from Annexe N°3** — totals for exercise N (just closed), N+1 (current year, often re-voted), N+2 (next year, the main vote). Line items with >20 % swing or >500 € absolute change.
-   - **Owner-specific data + travaux highlights** — owner's tantièmes, debit/credit balance from Annexe N°6 if listed, big-ticket travaux (ravalement, toiture, fonds ALUR, devis >5 000 €).
-   - **Briefing** — 3 to 7 prioritized "à retenir avant de voter" items the user should actually read.
-4. Read `references/html-template.html`. Substitute `{{AG_DATA_JSON}}` (serialized JSON, 2-space indent), `{{LANG}}` (fr/en), `{{YEAR}}`, `{{RESIDENCE_TITLE}}`.
-5. Write the result to `./ag-<slug>-<year>.html` in the user's CWD.
-6. Output the Step Completion Report (below), then briefly summarize the briefing (3–5 bullets max, since the report itself shows them in detail).
+   - **Meeting metadata** — date, time, location, syndic, vote-by-correspondence deadline. Record `meeting.pages`.
+   - **Resolutions** — every numbered item with its article-of-majority (Article 24/25/26/26-1) and "Sans vote" flag. Record `pages` on each résolution (page of "PROJETS DE RESOLUTIONS" where the body sits).
+   - **Financial Y-o-Y from Annexe N°3** — totals for exercise N (just closed), N+1 (current year, often re-voted), N+2 (next year, the main vote). Line items with >20 % swing or >500 € absolute change. Record `budget.pages` (annexe totals) and `pages` on each notable budget line.
+   - **Owner-specific data + travaux highlights** — owner's tantièmes, debit/credit balance from Annexe N°6 if listed, big-ticket travaux (ravalement, toiture, fonds ALUR, devis >5 000 €). Record `owner.balance_pages`, `owner.fonds_alur_pages`, and `pages` on each travaux entry.
+   - **Briefing** — 3 to 7 prioritized "à retenir avant de voter" items the user should actually read. Record the composite `pages` (résolution body + supporting annexe row).
+4. Set `source.pdf_path` to the absolute path of the source PDF. If you can derive a relative path from the report's CWD to the PDF (typically `cd` was somewhere near it), also set `source.pdf_path_relative` — that's what makes the deep links survive moves of the HTML+PDF as a pair.
+5. Read `references/html-template.html`. Substitute `{{AG_DATA_JSON}}` (serialized JSON, 2-space indent), `{{LANG}}` (fr/en), `{{YEAR}}`, `{{RESIDENCE_TITLE}}`.
+6. Write the result to `./ag-<slug>-<year>.html` in the user's CWD.
+7. Output the Step Completion Report (below), then briefly summarize the briefing (3–5 bullets max, since the report itself shows them in detail).
 
-Cross-syndic note: layouts vary. **Anchor on landmarks** ("ORDRE DU JOUR", "RESOLUTION N°", "ANNEXE N°", "tantièmes", "vote par correspondance") rather than fixed page numbers.
+Cross-syndic note: layouts vary. **Anchor on landmarks** ("ORDRE DU JOUR", "RESOLUTION N°", "ANNEXE N°", "tantièmes", "vote par correspondance") rather than fixed page numbers when *searching* the PDF — but always *record* the page you landed on, into the relevant `pages` array, so each fact can be cited back to the source.
 
 ## Query mode — answering follow-up questions
 

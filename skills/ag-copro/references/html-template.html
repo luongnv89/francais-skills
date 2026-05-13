@@ -109,6 +109,25 @@
     font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
   }
+  /* Page citation chip — discrete reference to a page in the source PDF. */
+  .page-chip {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.0625rem 0.375rem; border-radius: 9999px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.625rem; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--muted); background: rgba(11, 10, 8, 0.04);
+    border: 1px solid var(--line);
+    text-decoration: none; white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  a.page-chip:hover {
+    color: var(--accent-2); background: var(--accent-50, #FBF4E7); border-color: var(--accent);
+  }
+  .page-chip svg { width: 0.625rem; height: 0.625rem; opacity: 0.7; }
+  .page-chip.on-dark {
+    color: var(--paper-dim); background: rgba(244, 239, 230, 0.06); border-color: var(--line-strong);
+  }
+  a.page-chip.on-dark:hover { color: var(--accent); background: rgba(233, 195, 139, 0.12); border-color: var(--accent); }
   /* Hero warmth — radial gradients on dark ink. */
   .hero-glow {
     background:
@@ -141,6 +160,8 @@
     .bg-ink-950, .bg-ink-900 { background: white !important; color: #15120E !important; }
     .bg-ink-950 *, .bg-ink-900 * { color: #15120E !important; }
     .ring-white\/10 { box-shadow: inset 0 0 0 1px rgba(11,10,8,.15) !important; }
+    .page-chip { color: #3a342b !important; background: transparent !important; border-color: rgba(0,0,0,0.2) !important; }
+    .page-chip svg { display: none !important; }
   }
 </style>
 </head>
@@ -174,7 +195,20 @@
       <a href="#travaux"      class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.travaux">Travaux</a>
       <a href="#owner"        class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.owner">Mon lot</a>
     </nav>
-    <button onclick="window.print()" class="text-sm px-3 py-1.5 rounded-md bg-ink-950 text-ink-100 hover:bg-ink-900 font-mono tracking-wider">Imprimer / PDF</button>
+    <div class="flex items-center gap-2">
+      <a id="source-pdf-link" href="#" target="_blank" rel="noopener"
+         class="hidden text-xs px-3 py-1.5 rounded-md border hairline bg-white text-ink-700 hover:bg-ink-50 font-mono tracking-wider"
+         title="Ouvrir le PDF source">
+        <span class="inline-flex items-center gap-1.5">
+          <svg viewBox="0 0 16 16" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M3 2h6l4 4v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/>
+            <path d="M9 2v4h4"/>
+          </svg>
+          <span data-i18n="nav.source">PDF source</span>
+        </span>
+      </a>
+      <button onclick="window.print()" class="text-sm px-3 py-1.5 rounded-md bg-ink-950 text-ink-100 hover:bg-ink-900 font-mono tracking-wider">Imprimer / PDF</button>
+    </div>
   </div>
 </header>
 
@@ -190,7 +224,7 @@
         </svg>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <span class="label-mono" style="color: var(--accent);">Convocation · v1.2</span>
+        <span class="label-mono" style="color: var(--accent);">Convocation · v1.3</span>
         <span class="chip" style="background: rgba(244, 239, 230, 0.08); color: var(--paper-dim);">Assemblée Générale</span>
         <span class="chip" style="background: rgba(122, 162, 160, 0.18); color: var(--accent-3);" id="hero-year">…</span>
       </div>
@@ -383,6 +417,53 @@
     return sign + n.toFixed(1).replace('.', lang === 'en' ? '.' : ',') + ' %';
   };
 
+  /* ----- page citation chips ----- */
+  // Resolve the source-PDF reference once. Prefer a relative path (survives moves
+  // when HTML + PDF travel together); fall back to the absolute path; URL-encode
+  // each segment so spaces / accents in filenames don't break the link.
+  const src = data.source || {};
+  const encodePath = (p) => p.split('/').map(encodeURIComponent).join('/');
+  const pdfHref = (() => {
+    const rel = src.pdf_path_relative;
+    const abs = src.pdf_path;
+    if (rel) return encodePath(rel);
+    if (abs) return (abs.startsWith('/') ? 'file://' : '') + encodePath(abs);
+    return null;
+  })();
+  const fmtPages = (pages) => {
+    if (!Array.isArray(pages) || pages.length === 0) return '';
+    const ints = pages.filter(p => Number.isInteger(p) && p > 0);
+    if (ints.length === 0) return '';
+    if (ints.length === 1) return `p. ${ints[0]}`;
+    const min = Math.min(...ints), max = Math.max(...ints);
+    // Render dense runs as a range, otherwise comma-joined.
+    if (max - min === ints.length - 1) return `p. ${min}–${max}`;
+    return `p. ${ints.join(', ')}`;
+  };
+  // Build a `<a>` chip when we can deep-link, else a `<span>` chip (text only).
+  const pageChip = (pages, { dark = false } = {}) => {
+    const text = fmtPages(pages);
+    if (!text) return '';
+    const cls = `page-chip${dark ? ' on-dark' : ''}`;
+    if (pdfHref) {
+      const first = pages.find(p => Number.isInteger(p) && p > 0);
+      return `<a class="${cls}" href="${pdfHref}#page=${first}" target="_blank" rel="noopener" title="${lang === 'en' ? 'Open source PDF at this page' : 'Ouvrir le PDF source à cette page'}"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 1.5h4l2.5 2.5V10a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5Z"/><path d="M7 1.5V4h2.5"/></svg>${text}</a>`;
+    }
+    return `<span class="${cls}">${text}</span>`;
+  };
+
+  // Source-PDF header button — show only when we have a usable link.
+  const srcLink = document.getElementById('source-pdf-link');
+  if (srcLink && pdfHref) {
+    srcLink.href = pdfHref;
+    srcLink.classList.remove('hidden');
+    srcLink.title = lang === 'en'
+      ? `Open source PDF (${src.pdf_pages || '?'} pages)`
+      : `Ouvrir le PDF source (${src.pdf_pages || '?'} pages)`;
+    const lbl = srcLink.querySelector('[data-i18n="nav.source"]');
+    if (lbl) lbl.textContent = lang === 'en' ? 'Source PDF' : 'PDF source';
+  }
+
   /* ----- brand + hero ----- */
   const year = (data.meeting && data.meeting.date || '').slice(0,4);
   document.title = `AG ${year} — ${data.residence}`;
@@ -445,9 +526,10 @@
 
   /* ----- meeting block ----- */
   const m = data.meeting || {};
+  const meetingChip = pageChip(m.pages);
   document.getElementById('meeting-grid').innerHTML = `
     <dl class="bg-white shadow-card border hairline rounded-2xl p-7 space-y-3 text-sm">
-      ${m.date_fr ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.meeting}</dt><dd class="font-medium text-right text-ink-900">${m.date_fr}${m.time ? ' — ' + m.time : ''}</dd></div>` : ''}
+      ${m.date_fr ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.meeting}</dt><dd class="font-medium text-right text-ink-900">${m.date_fr}${m.time ? ' — ' + m.time : ''} ${meetingChip}</dd></div>` : ''}
       ${m.location ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.loc}</dt><dd class="font-medium text-right text-ink-900">${m.location}</dd></div>` : ''}
       ${data.syndic ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.syndic}</dt><dd class="font-medium text-right text-ink-900">${data.syndic}${data.syndic_address ? `<br><span class="text-ink-500 font-normal text-xs">${data.syndic_address}</span>` : ''}</dd></div>` : ''}
       ${m.dossier_ref ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.ref}</dt><dd class="font-mono text-xs text-ink-700 text-right">${m.dossier_ref}</dd></div>` : ''}
@@ -485,6 +567,7 @@
                 <h3 class="font-display text-xl font-light">${b.title}</h3>
                 ${b.resolutions && b.resolutions.length ? `<span class="chip ${c.chip}">Rés ${b.resolutions.join(', ')}</span>` : ''}
                 ${b.article ? `<span class="chip bg-ink-50 text-ink-700 border hairline">Art. ${b.article}</span>` : ''}
+                ${pageChip(b.pages)}
               </div>
               <p class="mt-2 text-sm text-ink-700 leading-relaxed">${b.body}</p>
             </div>
@@ -549,6 +632,7 @@
             <summary class="cursor-pointer list-none flex items-start gap-2">
               <svg class="chev mt-1 size-3 shrink-0 text-ink-500" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 2 4 4-4 4"/></svg>
               <span class="font-medium text-ink-900">${r.title}</span>
+              ${pageChip(r.pages)}
             </summary>
             <p class="mt-2 ml-5 text-ink-500 text-[13px] leading-relaxed">${r.summary || ''}</p>
           </details>
@@ -619,18 +703,21 @@
   const decreases = [...lines].sort((a, b) => (a.n_plus_2 - a.n_vote) - (b.n_plus_2 - b.n_vote))
     .filter(l => l.n_plus_2 - l.n_vote < -500).slice(0, 3);
   document.getElementById('budget-summary').innerHTML = `
-    <div class="label-mono" style="color: var(--accent);">${L.read_key}</div>
+    <div class="flex items-baseline justify-between gap-2 flex-wrap">
+      <div class="label-mono" style="color: var(--accent);">${L.read_key}</div>
+      ${pageChip(b.pages, {dark: true})}
+    </div>
     <p class="mt-3 font-display italic font-light text-xl leading-snug" style="color: var(--paper);">
       ${lang === 'en'
         ? `Overall change <span class="num not-italic font-medium" style="color: var(--accent);">${fmtPct(b.delta_pct)}</span>.`
         : `Variation globale <span class="num not-italic font-medium" style="color: var(--accent);">${fmtPct(b.delta_pct)}</span>.`}
     </p>
     ${increases.length ? `<ul class="mt-4 space-y-2 text-sm" style="color: var(--paper);">${increases.map(l => `
-        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num font-medium" style="color: var(--accent);">+${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}${pageChip(l.pages, {dark: true})}</span><span class="num font-medium" style="color: var(--accent);">+${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
       `).join('')}</ul>` : ''}
     ${decreases.length ? `<p class="mt-4 text-sm" style="color: var(--paper-dim);">${L.also_compensated}</p>
       <ul class="mt-2 space-y-2 text-sm" style="color: var(--paper);">${decreases.map(l => `
-        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num font-medium" style="color: var(--accent-3);">${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}${pageChip(l.pages, {dark: true})}</span><span class="num font-medium" style="color: var(--accent-3);">${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
       `).join('')}</ul>` : ''}
     ${b.excedent_2025_eur != null ? `<p class="mt-4 text-xs" style="color: var(--paper-dim);">${L.excedent} <span class="num" style="color: var(--paper);">${fmtEUR(b.excedent_2025_eur, {fraction: 2})}</span>.</p>` : ''}
   `;
@@ -676,7 +763,7 @@
       return `
         <div class="bg-white shadow-card border hairline rounded-2xl p-6">
           <div class="flex justify-between items-baseline gap-3">
-            <h3 class="font-display text-lg font-light">${t.label}</h3>
+            <h3 class="font-display text-lg font-light">${t.label} ${pageChip(t.pages)}</h3>
             <span class="chip" style="background: var(--accent-50, #FBF4E7); color: var(--accent-2); border: 1px solid var(--accent);">${pct} %</span>
           </div>
           <div class="mt-4 h-1.5 rounded-full bg-ink-50 overflow-hidden">
@@ -717,7 +804,10 @@
       ${tantiemes_pct != null ? `<div class="mt-2 text-xs text-ink-500">${lang === 'en' ? `represented out of 10,000 (${tantiemes_pct.toFixed(2)} % of the copropriété)` : `représentés sur 10 000 (${tantiemes_pct.toFixed(2).replace('.', ',')} % de la copro)`}</div>` : ''}
     </div>
     <div class="bg-white shadow-card border hairline rounded-2xl p-6">
-      <div class="label-mono" style="color: var(--muted);">${L.fonds}</div>
+      <div class="flex items-baseline justify-between gap-2">
+        <div class="label-mono" style="color: var(--muted);">${L.fonds}</div>
+        ${pageChip(o.fonds_alur_pages)}
+      </div>
       <div class="mt-2 text-3xl font-display font-light num">${o.fonds_alur_eur != null ? fmtEUR(o.fonds_alur_eur, {fraction: 2}) : '—'}</div>
       <div class="mt-2 text-xs text-ink-500">${lang === 'en' ? 'Your share, Annexe N°8' : 'Quote-part — Annexe N°8'}</div>
     </div>
@@ -725,18 +815,22 @@
 
   // Owner balance
   const bal = data.owner?.balance_eur;
+  const balChip = pageChip(data.owner?.balance_pages);
   let balanceHTML = '';
   if (bal == null) {
-    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
-      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${data.owner?.balance_note || L.balance_null}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border flex items-center justify-between gap-3 flex-wrap" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
+      <div><strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${data.owner?.balance_note || L.balance_null}</div>
+      ${balChip}
     </div>`;
   } else if (bal > 0) {
-    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
-      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(bal, {fraction: 2})} ${lang === 'en' ? 'in your favor (créditeur)' : 'créditeur'}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border flex items-center justify-between gap-3 flex-wrap" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
+      <div><strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(bal, {fraction: 2})} ${lang === 'en' ? 'in your favor (créditeur)' : 'créditeur'}</div>
+      ${balChip}
     </div>`;
   } else {
-    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(196,107,87,0.15); color: var(--rose-700, #A04B3A); border-color: var(--accent-2);">
-      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(Math.abs(bal), {fraction: 2})} ${lang === 'en' ? 'owed (débiteur)' : 'débiteur'}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border flex items-center justify-between gap-3 flex-wrap" style="background: rgba(196,107,87,0.15); color: var(--rose-700, #A04B3A); border-color: var(--accent-2);">
+      <div><strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(Math.abs(bal), {fraction: 2})} ${lang === 'en' ? 'owed (débiteur)' : 'débiteur'}</div>
+      ${balChip}
     </div>`;
   }
   document.getElementById('owner-balance').innerHTML = balanceHTML;
@@ -744,8 +838,14 @@
   /* ----- footer ----- */
   const ing = data.source?.ingested_at || '';
   const pdfPages = data.source?.pdf_pages;
+  const pdfLabel = src.pdf_path_relative || src.pdf_path;
+  const pagesPart = pdfPages
+    ? (pdfHref
+        ? ` · <a href="${pdfHref}" target="_blank" rel="noopener" style="color: var(--accent); text-decoration: underline; text-decoration-color: rgba(233,195,139,0.4); text-underline-offset: 3px;" title="${pdfLabel || ''}">${pdfPages} ${L.pages}</a>`
+        : ` · ${pdfPages} ${L.pages}`)
+    : '';
   document.getElementById('footer-meta').innerHTML =
-    `<span style="color: var(--paper-dim);">${L.generated_from}</span> <span style="color: var(--accent);">${ing}</span>${pdfPages ? ` · ${pdfPages} ${L.pages}` : ''} · <span style="color: var(--paper-dim);">ag-copro</span> <span class="font-display italic" style="color: var(--accent);">v1.2</span>`;
+    `<span style="color: var(--paper-dim);">${L.generated_from}</span> <span style="color: var(--accent);">${ing}</span>${pagesPart} · <span style="color: var(--paper-dim);">ag-copro</span> <span class="font-display italic" style="color: var(--accent);">v1.3</span>`;
 })();
 </script>
 </body>

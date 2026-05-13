@@ -18,8 +18,8 @@ If the file lacks a valid JSON block (corrupted, hand-edited, old format), tell 
 
 1. **Never re-read the source PDF in Query mode** unless the user explicitly says "re-ingest", "the report is wrong", "re-extract", or similar. The PDF is 30–60 pages — re-reading wastes context and produces inconsistencies.
 2. **Match the user's question language.** French question → French answer. English question → English answer. Mixed → match the dominant language. Keep French legal terms in French even when answering in English; italicize on first mention.
-3. **Cite the source within the report.** "D'après la résolution N°10…" / "From the `budget.n_plus_2_eur` field of the report…". Never bare-assert.
-4. **If the information isn't in the JSON, say so.** Offer to re-ingest. Do not invent.
+3. **Cite the source within the report.** "D'après la résolution N°10 (p. 17 du PDF) …" / "From the `budget.n_plus_2_eur` field of the report (Annexe N°3, p. 39) …". When the field carries a `pages` array, include the page in your answer; that's the user's verification path back to the original document.
+4. **If the information isn't in the JSON, say so.** Offer to re-ingest. Do not invent. Do not invent page numbers either — if a record lacks `pages`, omit the page citation rather than fabricate one.
 
 ## JSON field → question routing
 
