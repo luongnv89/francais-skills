@@ -1,0 +1,28 @@
+# Données personnelles — ne jamais publier
+resources/
+*.pdf
+
+# Agent runner state
+.agents/
+.claude/
+.codex/
+.gemini/
+.opencode/
+
+# Système / éditeur
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Python (au cas où)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (au cas où)
+node_modules/
