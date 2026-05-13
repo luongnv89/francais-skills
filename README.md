@@ -29,7 +29,8 @@ Aide un copropriétaire à comprendre la convocation annuelle d'Assemblée Gén�
 
 - **Ingère** le PDF de la convocation (30–60 pages) une seule fois.
 - **Extrait** : date et lieu de la réunion, date limite du vote par correspondance, toutes les résolutions avec l'article de majorité requis (24, 25, 26), comparaison du budget année par année (Annexe N°3), tantièmes du propriétaire, solde débiteur/créditeur, points de vigilance (gros travaux, devis, ravalement).
-- **Répond** aux questions ultérieures à partir du résumé sauvegardé, sans relire le PDF complet.
+- **Produit** un rapport HTML interactif (TailwindCSS + Chart.js, données embarquées en JSON) — graphiques budget, table des résolutions filtrable, briefing de 5 points, prêt à imprimer en PDF.
+- **Répond** aux questions ultérieures à partir des données embarquées dans le rapport, sans relire le PDF complet.
 
 **Exemples de questions :**
 
@@ -59,55 +60,74 @@ Si vous avez besoin d'une de ces skills (ou d'une autre), [ouvrez une issue](htt
 
 ---
 
-## Installation
-
-### Avec Claude Code
-
-```bash
-# Cloner le dépôt
-git clone https://github.com/luongnv89/francais-skills.git
-cd francais-skills
-
-# Copier la skill dans le répertoire des skills Claude Code
-mkdir -p ~/.claude/skills
-cp -r skills/ag-copro ~/.claude/skills/
-```
-
-Puis dans Claude Code : `/ag-copro /chemin/vers/votre-convocation.pdf`.
-
-### Avec Codex
+## Installation — *clone and go*
 
 ```bash
 git clone https://github.com/luongnv89/francais-skills.git
 cd francais-skills
-
-# Codex lit les skills depuis ~/.codex/skills/
-mkdir -p ~/.codex/skills
-cp -r skills/ag-copro ~/.codex/skills/
 ```
 
-### Avec opencode
+C'est tout. Le dépôt est conçu pour être **immédiatement utilisable** depuis ce répertoire : les skills sont déjà câblées pour `.claude/`, `.codex/`, `.opencode/`, `.agents/` et `.gemini/` via des liens symboliques vers le dossier `skills/`. Lancez votre runner (Claude Code, Codex, opencode, etc.) depuis la racine du dépôt et toutes les skills sont disponibles.
 
 ```bash
-git clone https://github.com/luongnv89/francais-skills.git
+# Exemple avec Claude Code
 cd francais-skills
+claude              # les skills de skills/ sont visibles via .claude/skills
 
-# opencode lit les skills depuis ~/.opencode/skills/
-mkdir -p ~/.opencode/skills
-cp -r skills/ag-copro ~/.opencode/skills/
+# Puis dans la session :
+/ag-copro /chemin/vers/votre-convocation.pdf
 ```
 
-### Avec un autre runner
+### Si les liens symboliques sont cassés
 
-La structure d'une skill est standard : un fichier `SKILL.md` à la racine, un dossier `references/` pour les playbooks détaillés, un dossier `docs/` pour la documentation humaine. Copiez le dossier `skills/ag-copro/` à l'emplacement attendu par votre runner.
+Sous Windows, sur un système de fichiers exotique ou après un `git clone` particulier, les liens peuvent ne pas être restaurés. Lancez le script d'installation :
+
+```bash
+./install.sh
+```
+
+Il recrée les 5 liens symboliques (`.claude/skills`, `.codex/skills`, `.opencode/skills`, `.agents/skills`, `.gemini/skills` → `../skills`). Le script est idempotent : safe à relancer.
+
+### Si vous préférez une installation globale
+
+Vous pouvez aussi copier les skills dans le répertoire utilisateur de votre runner pour qu'elles soient disponibles partout, pas seulement dans ce dépôt :
+
+```bash
+# Claude Code
+mkdir -p ~/.claude/skills && cp -r skills/ag-copro ~/.claude/skills/
+
+# Codex
+mkdir -p ~/.codex/skills && cp -r skills/ag-copro ~/.codex/skills/
+
+# opencode
+mkdir -p ~/.opencode/skills && cp -r skills/ag-copro ~/.opencode/skills/
+```
+
+### Structure du dépôt
+
+```
+francais-skills/
+├── skills/                 # source canonique des skills (à modifier ici)
+│   └── ag-copro/
+├── .claude/skills      ──► ../skills (lien symbolique)
+├── .codex/skills       ──► ../skills (lien symbolique)
+├── .opencode/skills    ──► ../skills (lien symbolique)
+├── .agents/skills      ──► ../skills (lien symbolique)
+├── .gemini/skills      ──► ../skills (lien symbolique)
+├── install.sh              # restaure les liens si besoin
+├── README.md
+└── LICENSE
+```
+
+Tout changement dans `skills/` est immédiatement visible par tous les runners — pas de duplication, pas de divergence.
 
 ---
 
-## Où sont stockés les résumés ?
+## Où sont stockés les rapports ?
 
-Les résumés produits par les skills sont sauvegardés dans `~/.ag-copro/summaries/` (chemin neutre, indépendant de l'outil utilisé). Si vous changez de runner (Claude → Codex), vos résumés restent accessibles.
+Chaque skill décide de son emplacement de sortie. Pour `ag-copro`, le rapport HTML interactif (`ag-<slug>-<année>.html`) est écrit dans le **répertoire de travail courant** au moment où vous invoquez la skill. Faites un `cd` vers le dossier où vous voulez le récupérer avant d'appeler la skill.
 
-Format des fichiers : Markdown avec un en-tête YAML structuré. Vous pouvez les lire directement, les sauvegarder, ou les transmettre à un autre membre de la copropriété.
+Le rapport est un fichier HTML autonome (TailwindCSS + Chart.js via CDN, données embarquées en JSON dans un `<script>`) — vous pouvez l'ouvrir dans n'importe quel navigateur, l'imprimer en PDF, ou le transmettre à un autre membre de la copropriété.
 
 ---
 

@@ -2,12 +2,23 @@
 resources/
 *.pdf
 
-# Agent runner state
-.agents/
-.claude/
-.codex/
-.gemini/
-.opencode/
+# Caches / logs des agent runners (volatils, parfois sensibles)
+# On versionne .claude/, .codex/, .gemini/, .opencode/, .agents/ (wiring symlinks
+# et fichiers de config partagés) mais on exclut les sous-dossiers volatils.
+.claude/projects/
+.claude/logs/
+.claude/cache/
+.claude/sessions/
+.codex/logs/
+.codex/cache/
+.codex/sessions/
+.opencode/logs/
+.opencode/cache/
+.opencode/sessions/
+.gemini/logs/
+.gemini/cache/
+.agents/logs/
+.agents/cache/
 
 # Système / éditeur
 .DS_Store
@@ -26,3 +37,4 @@ venv/
 
 # Node (au cas où)
 node_modules/
+.gstack/

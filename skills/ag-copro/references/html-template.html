@@ -1,0 +1,651 @@
+<!doctype html>
+<!--
+  ag-copro HTML report template.
+
+  This file is the canonical template the skill writes to disk (after substituting
+  the embedded JSON data and document title). All visual + structural code lives
+  here; the skill's job is to produce the JSON payload that fills <script id="ag-data">.
+
+  Schema: see references/html-template.md.
+  Charts: Chart.js v4 (CDN). Styling: Tailwind CSS Play CDN.
+  Fonts: Inter + Fraunces + JetBrains Mono (Google Fonts).
+-->
+<html lang="{{LANG}}" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AG {{YEAR}} — {{RESIDENCE_TITLE}}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          display: ['"Fraunces"', 'ui-serif', 'Georgia'],
+          mono: ['"JetBrains Mono"', 'ui-monospace'],
+        },
+        colors: {
+          ink: { 950:'#0b1020', 900:'#101729', 800:'#1a2238', 700:'#2a3350', 500:'#5b6781', 300:'#a4adc4', 100:'#e9ecf5' },
+          accent: { 600:'#c2410c', 500:'#ea580c', 400:'#fb923c', 300:'#fdba74', 50:'#fff7ed' },
+          mint:   { 700:'#0f766e', 500:'#14b8a6', 200:'#99f6e4' },
+          amber:  { 700:'#b45309', 500:'#f59e0b', 200:'#fde68a' },
+          rose:   { 700:'#be123c', 500:'#f43f5e', 200:'#fecdd3' },
+        },
+        boxShadow: {
+          card: '0 1px 0 rgba(16, 24, 40, 0.04), 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -12px rgba(16, 24, 40, 0.12)',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  html, body { font-family: 'Inter', ui-sans-serif, system-ui; background: #f6f5f1; }
+  h1, h2, h3 { font-family: 'Fraunces', ui-serif; letter-spacing: -0.01em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .hairline { border-color: rgba(11, 16, 32, 0.08); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    padding: 0.125rem 0.5rem; border-radius: 9999px;
+    font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .grid-paper {
+    background-image:
+      linear-gradient(rgba(11,16,32,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(11,16,32,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .ribbon::before {
+    content: ""; position: absolute; left: -1px; top: 1rem; bottom: 1rem; width: 3px;
+    background: linear-gradient(180deg, #ea580c, #f59e0b); border-radius: 3px;
+  }
+  details[open] > summary .chev { transform: rotate(90deg); }
+  .chev { transition: transform 0.18s ease; }
+  ::selection { background: #fde68a; color: #1a2238; }
+  @media print {
+    .no-print { display: none !important; }
+    html, body { background: white; }
+    .shadow-card, .shadow-sm { box-shadow: none !important; }
+    .break-before { break-before: page; }
+  }
+</style>
+</head>
+<body class="text-ink-900 antialiased">
+
+<!-- Embedded structured data — single source of truth for charts AND Query mode. -->
+<script type="application/json" id="ag-data">
+{{AG_DATA_JSON}}
+</script>
+
+<header class="no-print sticky top-0 z-30 bg-[#f6f5f1]/85 backdrop-blur border-b hairline">
+  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="size-8 rounded-md bg-ink-900 grid place-items-center text-white font-display font-bold">A</div>
+      <div>
+        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">ag-copro · rapport interactif</div>
+        <div class="text-sm font-semibold leading-tight" id="brand-title">…</div>
+      </div>
+    </div>
+    <nav class="hidden md:flex items-center gap-1 text-sm">
+      <a href="#meeting"      class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.meeting">Réunion</a>
+      <a href="#briefing"     class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.briefing">À retenir</a>
+      <a href="#resolutions"  class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.resolutions">Résolutions</a>
+      <a href="#budget"       class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.budget">Budget</a>
+      <a href="#travaux"      class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.travaux">Travaux</a>
+      <a href="#owner"        class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.owner">Mon lot</a>
+    </nav>
+    <button onclick="window.print()" class="text-sm px-3 py-1.5 rounded-md bg-ink-900 text-white hover:bg-ink-800">Imprimer / PDF</button>
+  </div>
+</header>
+
+<section class="relative grid-paper border-b hairline">
+  <div class="max-w-6xl mx-auto px-6 pt-12 pb-10">
+    <div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">
+      <span class="chip bg-accent-50 text-accent-600">Convocation</span>
+      <span class="chip bg-ink-900/5 text-ink-700">Assemblée Générale</span>
+      <span class="chip bg-mint-200 text-mint-700" id="hero-year">…</span>
+    </div>
+    <h1 id="hero-title" class="mt-4 text-5xl md:text-6xl font-display font-semibold leading-[1.02] text-ink-900">…</h1>
+    <p id="hero-tagline" class="mt-4 text-ink-500 max-w-2xl">…</p>
+
+    <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-3" id="hero-cards"></div>
+  </div>
+</section>
+
+<section id="meeting" class="max-w-6xl mx-auto px-6 py-12">
+  <div class="flex items-baseline justify-between mb-6">
+    <h2 class="text-3xl font-display font-semibold">1. La réunion</h2>
+    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Section 1 · Meeting metadata</div>
+  </div>
+  <div class="grid md:grid-cols-2 gap-3" id="meeting-grid"></div>
+</section>
+
+<section id="briefing" class="bg-gradient-to-b from-[#f6f5f1] to-white border-y hairline">
+  <div class="max-w-6xl mx-auto px-6 py-14">
+    <div class="flex items-baseline justify-between mb-6">
+      <div>
+        <h2 class="text-3xl font-display font-semibold">2. À retenir avant de voter</h2>
+        <p class="text-ink-500 mt-1 text-sm">Les points les plus importants — extraits des résolutions à enjeu et de l'Annexe N°3.</p>
+      </div>
+      <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Briefing</div>
+    </div>
+    <ol id="briefing-list" class="space-y-3"></ol>
+  </div>
+</section>
+
+<section id="resolutions" class="max-w-6xl mx-auto px-6 py-14">
+  <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+    <div>
+      <h2 class="text-3xl font-display font-semibold" id="resolutions-title">3. Les résolutions</h2>
+      <p class="text-ink-500 mt-1 text-sm">Filtrez par article, masquez les procédurales, cherchez par mot-clé.</p>
+    </div>
+    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Section 2 · Résolutions</div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white shadow-card rounded-xl p-5 lg:col-span-1">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">Répartition par article</div>
+      <div class="relative h-64 mt-2"><canvas id="chart-resolutions"></canvas></div>
+    </div>
+    <div class="bg-white shadow-card rounded-xl p-5 lg:col-span-2 no-print">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold mb-3">Filtrer</div>
+      <div class="flex flex-wrap gap-2 mb-4" id="article-filters"></div>
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="inline-flex items-center gap-2 text-sm">
+          <input type="checkbox" id="hide-procedural" class="rounded">
+          <span>Masquer procédurales / sans vote</span>
+        </label>
+        <div class="flex-1 min-w-[200px] relative">
+          <input id="search" type="search" placeholder="Chercher (ravalement, syndic, budget…)"
+                 class="w-full px-3 py-2 pl-9 rounded-md border hairline bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-300" />
+          <svg class="absolute left-2.5 top-2.5 size-4 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </div>
+        <div class="text-xs text-ink-500" id="result-count"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-card rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-ink-900/5 text-[11px] uppercase tracking-[0.12em] text-ink-500">
+        <tr>
+          <th class="text-left px-4 py-3 w-14">N°</th>
+          <th class="text-left px-4 py-3">Titre</th>
+          <th class="text-left px-4 py-3 w-28">Article</th>
+          <th class="text-right px-4 py-3 w-32">Montant</th>
+        </tr>
+      </thead>
+      <tbody id="resolutions-tbody" class="divide-y hairline"></tbody>
+    </table>
+  </div>
+</section>
+
+<section id="budget" class="bg-ink-950 text-ink-100 break-before">
+  <div class="max-w-6xl mx-auto px-6 py-14">
+    <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+      <div>
+        <h2 class="text-3xl font-display font-semibold text-white">4. Le budget en clair</h2>
+        <p class="text-ink-300 mt-1 text-sm">Annexe N°3 du document — comparaison année par année + lignes qui bougent.</p>
+      </div>
+      <div class="text-xs text-ink-300 uppercase tracking-[0.18em]">Section 3 · Financial Y-o-Y</div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6">
+      <div class="bg-white/5 ring-1 ring-white/10 rounded-xl p-5 lg:col-span-3">
+        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold mb-2">Totaux par exercice</div>
+        <div class="relative h-72"><canvas id="chart-budget"></canvas></div>
+      </div>
+      <div class="bg-white/5 ring-1 ring-white/10 rounded-xl p-5 lg:col-span-2 text-sm" id="budget-summary"></div>
+    </div>
+    <div class="mt-8 bg-white/5 ring-1 ring-white/10 rounded-xl p-5">
+      <div class="flex items-baseline justify-between mb-4">
+        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold">Lignes notables — variation N+2 vs N voté</div>
+        <div class="text-xs text-ink-300" id="lines-count"></div>
+      </div>
+      <div class="relative h-[420px]"><canvas id="chart-lines"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section id="travaux" class="max-w-6xl mx-auto px-6 py-14">
+  <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+    <div>
+      <h2 class="text-3xl font-display font-semibold">5. Travaux exceptionnels</h2>
+      <p class="text-ink-500 mt-1 text-sm">Chantiers votés antérieurement — pas de re-vote à cette AG, mais c'est souvent le poste le plus lourd.</p>
+    </div>
+    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Annexes N°2 & N°5</div>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="bg-white shadow-card rounded-xl p-6">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">Avancement global</div>
+      <div class="relative h-72 mt-3"><canvas id="chart-travaux"></canvas></div>
+    </div>
+    <div class="space-y-3">
+      <div id="travaux-cards" class="space-y-3"></div>
+      <div id="travaux-note" class="bg-amber-50 rounded-xl p-5 border border-amber-200 text-sm text-amber-700 hidden"></div>
+    </div>
+  </div>
+</section>
+
+<section id="owner" class="bg-gradient-to-b from-white to-[#f6f5f1] border-t hairline">
+  <div class="max-w-6xl mx-auto px-6 py-14">
+    <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+      <div>
+        <h2 class="text-3xl font-display font-semibold">6. Mon lot</h2>
+        <p class="text-ink-500 mt-1 text-sm">Données spécifiques au copropriétaire — Annexes N°6 et N°8.</p>
+      </div>
+      <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Owner-specific</div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-3" id="owner-cards"></div>
+    <div id="owner-balance" class="mt-4"></div>
+  </div>
+</section>
+
+<footer class="max-w-6xl mx-auto px-6 py-10 text-xs text-ink-500">
+  <div class="flex flex-wrap gap-4 justify-between">
+    <div id="footer-meta">…</div>
+    <div>Ce rapport ne constitue pas un conseil juridique. Décidez avec votre conseil syndical.</div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const data = JSON.parse(document.getElementById('ag-data').textContent);
+  const lang = (data.language || 'fr').slice(0, 2);
+
+  /* ----- i18n minimal ----- */
+  const t = {
+    fr: { meeting: 'Réunion', deadline: 'Vote par correspondance', budget: 'Budget N+2 à voter', owner: 'Vos tantièmes',
+          balance_null: 'Balance nulle — n\'apparaît pas dans l\'Annexe N°6',
+          owner_title: 'Identité', tantiemes: 'Tantièmes', fonds: 'Fonds Travaux ALUR',
+          loc: 'Lieu', syndic: 'Syndic', ref: 'Réf. dossier', return_to: 'Retour',
+          read_key: 'Lecture clé', also_compensated: 'Compensé partiellement par :',
+          excedent: 'Excédent dégagé en N :',
+          briefing_filler: 'Aucun point d\'attention répertorié.',
+          generated_from: 'Généré le', pages: 'pages' },
+    en: { meeting: 'Meeting', deadline: 'Postal vote deadline', budget: 'Next-year budget to vote', owner: 'Your tantièmes',
+          balance_null: 'Zero balance — not listed in Annexe N°6',
+          owner_title: 'Identity', tantiemes: 'Tantièmes', fonds: 'Fonds Travaux ALUR (works reserve)',
+          loc: 'Location', syndic: 'Syndic', ref: 'File ref', return_to: 'Return to',
+          read_key: 'Key takeaway', also_compensated: 'Partially offset by:',
+          excedent: 'Surplus from previous exercise:',
+          briefing_filler: 'No highlights recorded.',
+          generated_from: 'Generated on', pages: 'pages' },
+  };
+  const L = t[lang] || t.fr;
+
+  /* ----- formatting ----- */
+  const fmtEUR = (n, opts = {}) => {
+    if (n === null || n === undefined) return '—';
+    return new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'fr-FR',
+      { style: 'currency', currency: data.budget && data.budget.currency || 'EUR',
+        maximumFractionDigits: opts.fraction ?? 0 }).format(n);
+  };
+  const fmtPct = (n) => {
+    if (n === null || n === undefined) return '—';
+    const sign = n > 0 ? '+' : '';
+    return sign + n.toFixed(1).replace('.', lang === 'en' ? '.' : ',') + ' %';
+  };
+
+  /* ----- brand + hero ----- */
+  const year = (data.meeting && data.meeting.date || '').slice(0,4);
+  document.title = `AG ${year} — ${data.residence}`;
+  document.getElementById('brand-title').textContent = `${data.residence} · AG ${year}`;
+  document.getElementById('hero-year').textContent = year;
+  // Split residence into "First-words" + "last word italic" to mimic the editorial hero.
+  const r = (data.residence || '').trim();
+  const parts = r.split(/\s+/);
+  let heroHTML;
+  if (parts.length >= 2) {
+    const head = parts.slice(0, parts.length - 1).join(' ');
+    const tail = parts[parts.length - 1];
+    heroHTML = `${head} <span class="italic text-accent-600">${tail}</span>`;
+  } else {
+    heroHTML = `<span class="italic text-accent-600">${r}</span>`;
+  }
+  document.getElementById('hero-title').innerHTML = heroHTML;
+  document.getElementById('hero-tagline').textContent =
+    (lang === 'en'
+      ? `Interactive reading of the AG convocation from ${data.syndic || 'your syndic'} — ${data.source && data.source.pdf_pages || '?'} pages condensed into key numbers, resolutions and watchpoints.`
+      : `Lecture interactive de la convocation d'AG envoyée par ${data.syndic || 'votre syndic'} — ${data.source && data.source.pdf_pages || '?'} pages condensées en chiffres clés, résolutions et points d'attention.`);
+
+  /* ----- hero cards ----- */
+  const heroCards = [
+    {
+      label: L.meeting,
+      title: data.meeting?.date_fr || data.meeting?.date || '—',
+      sub: (data.meeting?.time ? (lang === 'en' ? '' : '') + data.meeting.time : '—'),
+      foot: data.meeting?.location || '',
+    },
+    {
+      label: L.deadline,
+      title: data.meeting?.vote_correspondence_deadline_fr || data.meeting?.vote_correspondence_deadline || '—',
+      titleClass: 'text-rose-700',
+      sub: lang === 'en' ? '3 working days before AG' : '3 jours francs avant l\'AG',
+      foot: data.meeting?.return_email ? `${L.return_to}: <span class="font-mono">${data.meeting.return_email}</span>` : '',
+    },
+    {
+      label: L.budget,
+      title: fmtEUR(data.budget?.n_plus_2_eur, {fraction:0}),
+      sub: `<span class="text-accent-600 font-semibold num">${fmtPct(data.budget?.delta_pct)} vs ${data.budget?.n_label || 'N'}</span>`,
+      foot: '',
+    },
+    {
+      label: L.owner,
+      title: `${data.owner?.tantiemes ?? '—'} <span class="text-ink-300 text-base">/ 10 000</span>`,
+      sub: data.owner?.lots || '',
+      foot: data.owner?.balance_eur != null
+        ? `Solde: ${fmtEUR(data.owner.balance_eur)}`
+        : (data.owner?.balance_note || L.balance_null),
+    }
+  ];
+  document.getElementById('hero-cards').innerHTML = heroCards.map(c => `
+    <div class="relative bg-white shadow-card rounded-xl p-5 ribbon">
+      <div class="text-[11px] uppercase tracking-[0.16em] text-ink-500 font-semibold">${c.label}</div>
+      <div class="mt-2 text-2xl font-display font-semibold leading-tight ${c.titleClass || ''} num">${c.title}</div>
+      <div class="text-sm text-ink-500">${c.sub || ''}</div>
+      ${c.foot ? `<div class="mt-3 text-xs text-ink-500">${c.foot}</div>` : ''}
+    </div>
+  `).join('');
+
+  /* ----- meeting block ----- */
+  const m = data.meeting || {};
+  document.getElementById('meeting-grid').innerHTML = `
+    <dl class="bg-white shadow-card rounded-xl p-6 space-y-3 text-sm">
+      ${m.date_fr ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.meeting}</dt><dd class="font-medium text-right">${m.date_fr}${m.time ? ' — ' + m.time : ''}</dd></div>` : ''}
+      ${m.location ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.loc}</dt><dd class="font-medium text-right">${m.location}</dd></div>` : ''}
+      ${data.syndic ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.syndic}</dt><dd class="font-medium text-right">${data.syndic}${data.syndic_address ? `<br><span class="text-ink-500 font-normal">${data.syndic_address}</span>` : ''}</dd></div>` : ''}
+      ${m.dossier_ref ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.ref}</dt><dd class="font-mono text-xs text-ink-700 text-right">${m.dossier_ref}</dd></div>` : ''}
+    </dl>
+    <div class="bg-ink-900 text-white rounded-xl p-6 shadow-card">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-accent-300 font-semibold">${L.deadline}</div>
+      <p class="mt-2 text-2xl font-display">${lang === 'en' ? 'By' : 'Avant le'} <span class="text-accent-300">${m.vote_correspondence_deadline_fr || m.vote_correspondence_deadline || '—'}</span></p>
+      <p class="mt-3 text-sm text-ink-100/80 leading-relaxed">${lang === 'en' ? 'Per French Law 10/07/1965 art. 17-1 A — 3 working days before the meeting. Online vote often available up to 3 days before via the syndic\'s portal.' : 'Conformément à la loi du 10/07/1965 art. 17-1 A — délai de 3 jours francs avant la séance. Vote en ligne possible jusqu\'à 3 jours avant l\'AG depuis l\'espace client.'}</p>
+      <ul class="mt-4 text-sm space-y-1.5 text-ink-100">
+        ${m.return_email ? `<li><span class="text-ink-300">Email :</span> <span class="font-mono text-accent-300">${m.return_email}</span></li>` : ''}
+        ${m.return_postal ? `<li><span class="text-ink-300">${lang === 'en' ? 'Postal' : 'Postal'} :</span> ${m.return_postal}</li>` : ''}
+      </ul>
+    </div>
+  `;
+
+  /* ----- briefing ----- */
+  const sev = {
+    high: { ring: 'ring-rose-200', dot: 'bg-rose-500', chip: 'bg-rose-200 text-rose-700' },
+    med:  { ring: 'ring-amber-200', dot: 'bg-amber-500', chip: 'bg-amber-200 text-amber-700' },
+    low:  { ring: 'ring-ink-900/10', dot: 'bg-ink-700', chip: 'bg-ink-900/5 text-ink-700' },
+  };
+  const briefings = data.briefing || [];
+  document.getElementById('briefing-list').innerHTML = briefings.length === 0
+    ? `<li class="text-ink-500 italic">${L.briefing_filler}</li>`
+    : briefings.map((b, i) => {
+        const c = sev[b.severity] || sev.low;
+        return `
+          <li class="bg-white shadow-card rounded-xl p-5 flex gap-4 ring-1 ${c.ring}">
+            <div class="shrink-0 size-8 rounded-md ${c.dot} text-white grid place-items-center font-display font-semibold text-sm">${i+1}</div>
+            <div class="flex-1">
+              <div class="flex flex-wrap items-baseline gap-2">
+                <h3 class="font-display text-lg font-semibold">${b.title}</h3>
+                ${b.resolutions && b.resolutions.length ? `<span class="chip ${c.chip}">Rés ${b.resolutions.join(', ')}</span>` : ''}
+                ${b.article ? `<span class="chip bg-ink-900/5 text-ink-700">Art. ${b.article}</span>` : ''}
+              </div>
+              <p class="mt-1.5 text-sm text-ink-700 leading-relaxed">${b.body}</p>
+            </div>
+          </li>`;
+      }).join('');
+
+  /* ----- resolutions ----- */
+  const resolutions = data.resolutions || [];
+  document.getElementById('resolutions-title').textContent =
+    lang === 'en' ? `3. The ${resolutions.length} resolutions` : `3. Les ${resolutions.length} résolutions`;
+
+  const articleKey = r => r.vote === 'sans vote' ? 'Sans vote' : (r.article ? `Art. ${r.article}` : '—');
+  const articleCounts = {};
+  resolutions.forEach(r => { const k = articleKey(r); articleCounts[k] = (articleCounts[k] || 0) + 1; });
+  const articleKeys = Object.keys(articleCounts);
+  const state = { activeArticles: new Set(articleKeys), hideProc: false, search: '' };
+
+  const articleColor = (label) => {
+    if (label === 'Sans vote') return 'bg-ink-900/5 text-ink-700';
+    if (label === 'Art. 25')   return 'bg-rose-200 text-rose-700';
+    if (label === 'Art. 26')   return 'bg-amber-200 text-amber-700';
+    if (label === 'Art. 26-1') return 'bg-amber-200 text-amber-700';
+    if (label === 'Art. 25-1') return 'bg-rose-200 text-rose-700';
+    return 'bg-mint-200 text-mint-700';
+  };
+
+  const filtersEl = document.getElementById('article-filters');
+  filtersEl.innerHTML = articleKeys.map(k => `
+    <button data-article="${k}" class="filter-btn chip bg-ink-900/5 text-ink-700 hover:bg-ink-900/10 transition" data-active="true">
+      <span class="size-1.5 rounded-full bg-current opacity-70"></span>${k} · ${articleCounts[k]}
+    </button>
+  `).join('');
+  filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.article;
+      if (state.activeArticles.has(k)) state.activeArticles.delete(k); else state.activeArticles.add(k);
+      btn.style.opacity = state.activeArticles.has(k) ? '1' : '0.35';
+      renderTable();
+    });
+  });
+  document.getElementById('hide-procedural').addEventListener('change', e => { state.hideProc = e.target.checked; renderTable(); });
+  document.getElementById('search').addEventListener('input', e => { state.search = e.target.value.trim().toLowerCase(); renderTable(); });
+
+  function renderTable() {
+    const filtered = resolutions.filter(r => {
+      const k = articleKey(r);
+      if (!state.activeArticles.has(k)) return false;
+      if (state.hideProc && (r.tag === 'procedural' || r.tag === 'informatif')) return false;
+      if (state.search) {
+        const blob = `${r.num} ${r.title} ${r.summary || ''}`.toLowerCase();
+        if (!blob.includes(state.search)) return false;
+      }
+      return true;
+    });
+    document.getElementById('result-count').textContent =
+      `${filtered.length} / ${resolutions.length} ${lang === 'en' ? 'resolutions' : 'résolutions'}`;
+    document.getElementById('resolutions-tbody').innerHTML = filtered.map(r => `
+      <tr class="hover:bg-ink-900/5 align-top">
+        <td class="px-4 py-3 font-mono text-xs text-ink-700">${r.num}</td>
+        <td class="px-4 py-3">
+          <details class="group">
+            <summary class="cursor-pointer list-none flex items-start gap-2">
+              <svg class="chev mt-1 size-3 shrink-0 text-ink-500" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 2 4 4-4 4"/></svg>
+              <span class="font-medium text-ink-900">${r.title}</span>
+            </summary>
+            <p class="mt-2 ml-5 text-ink-500 text-[13px] leading-relaxed">${r.summary || ''}</p>
+          </details>
+        </td>
+        <td class="px-4 py-3"><span class="chip ${articleColor(articleKey(r))}">${articleKey(r)}</span></td>
+        <td class="px-4 py-3 text-right num text-ink-700">${r.amount_eur ? fmtEUR(r.amount_eur, {fraction: r.amount_eur >= 1000 ? 0 : 2}) : '—'}</td>
+      </tr>
+    `).join('');
+  }
+  renderTable();
+
+  /* ----- charts ----- */
+  // Résolutions donut
+  new Chart(document.getElementById('chart-resolutions'), {
+    type: 'doughnut',
+    data: {
+      labels: articleKeys,
+      datasets: [{
+        data: articleKeys.map(k => articleCounts[k]),
+        backgroundColor: ['#14b8a6', '#f43f5e', '#f59e0b', '#a4adc4', '#5b6781', '#0f766e', '#ea580c'],
+        borderColor: '#fff', borderWidth: 2,
+      }]
+    },
+    options: { cutout: '62%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+        tooltip: { callbacks: { label: c => `${c.label}: ${c.parsed}` } } } }
+  });
+
+  // Budget bars
+  const b = data.budget || {};
+  const budgetLabels = [
+    b.n_label || 'N voté',
+    (lang === 'en' ? 'N realised' : 'N réalisé'),
+    b.n_plus_1_label || 'N+1',
+    b.n_plus_2_label || 'N+2'
+  ];
+  const budgetValues = [b.n_eur, b.n_realise_eur, b.n_plus_1_eur, b.n_plus_2_eur];
+  new Chart(document.getElementById('chart-budget'), {
+    data: {
+      labels: budgetLabels,
+      datasets: [{
+        type: 'bar', label: 'Montant (€)', data: budgetValues,
+        backgroundColor: ['rgba(164,173,196,0.55)', 'rgba(20,184,166,0.55)', 'rgba(251,146,60,0.65)', 'rgba(234,88,12,0.85)'],
+        borderColor: ['#a4adc4', '#14b8a6', '#fb923c', '#ea580c'], borderWidth: 1, borderRadius: 6,
+      }]
+    },
+    options: { plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => fmtEUR(c.parsed.y, {fraction: 0}) } } },
+      scales: { x: { ticks: { color: '#a4adc4' }, grid: { display: false } },
+        y: { ticks: { color: '#a4adc4', callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(255,255,255,0.06)' } } } }
+  });
+
+  // Budget summary (key takeaway)
+  const lines = data.budget_lines || [];
+  const sortedLines = [...lines].sort((a, b) => (b.n_plus_2 - b.n_vote) - (a.n_plus_2 - a.n_vote));
+  const top = sortedLines.slice(0, 10);
+  document.getElementById('lines-count').textContent =
+    `${top.length} ${lang === 'en' ? 'accounts' : 'comptes'} · >20 % ou >500 €`;
+  // Build summary card
+  const increases = top.filter(l => l.n_plus_2 - l.n_vote > 500).slice(0, 3);
+  const decreases = [...lines].sort((a, b) => (a.n_plus_2 - a.n_vote) - (b.n_plus_2 - b.n_vote))
+    .filter(l => l.n_plus_2 - l.n_vote < -500).slice(0, 3);
+  document.getElementById('budget-summary').innerHTML = `
+    <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold">${L.read_key}</div>
+    <p class="mt-3 text-ink-100 leading-relaxed">
+      ${lang === 'en'
+        ? `Overall change <span class="num text-accent-300 font-semibold">${fmtPct(b.delta_pct)}</span>.`
+        : `Variation globale <span class="num text-accent-300 font-semibold">${fmtPct(b.delta_pct)}</span>.`}
+    </p>
+    ${increases.length ? `<ul class="mt-3 space-y-2">${increases.map(l => `
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num text-accent-300 font-semibold">+${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+      `).join('')}</ul>` : ''}
+    ${decreases.length ? `<p class="mt-4 text-ink-300">${L.also_compensated}</p>
+      <ul class="mt-2 space-y-2">${decreases.map(l => `
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num text-mint-200 font-semibold">${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+      `).join('')}</ul>` : ''}
+    ${b.excedent_2025_eur != null ? `<p class="mt-4 text-xs text-ink-300">${L.excedent} <span class="num text-white">${fmtEUR(b.excedent_2025_eur, {fraction: 2})}</span>.</p>` : ''}
+  `;
+
+  // Budget line items (horizontal bar)
+  new Chart(document.getElementById('chart-lines'), {
+    type: 'bar',
+    data: {
+      labels: top.map(l => l.label),
+      datasets: [
+        { label: b.n_label || 'N voté', data: top.map(l => l.n_vote),
+          backgroundColor: 'rgba(164,173,196,0.45)', borderColor: '#a4adc4', borderWidth: 1 },
+        { label: b.n_plus_2_label || 'N+2', data: top.map(l => l.n_plus_2),
+          backgroundColor: 'rgba(251,146,60,0.75)', borderColor: '#ea580c', borderWidth: 1 }
+      ]
+    },
+    options: { indexAxis: 'y',
+      plugins: { legend: { labels: { color: '#e9ecf5', boxWidth: 10 } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtEUR(c.parsed.x, {fraction: 0})}` } } },
+      scales: { x: { ticks: { color: '#a4adc4', callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(255,255,255,0.06)' } },
+        y: { ticks: { color: '#e9ecf5', font: { size: 11 } }, grid: { display: false } } } }
+  });
+
+  /* ----- travaux ----- */
+  const travaux = data.travaux || [];
+  if (travaux.length === 0) {
+    document.getElementById('travaux').classList.add('hidden');
+  } else {
+    const totalVote = travaux.reduce((s, t) => s + (t.vote_eur || 0), 0);
+    const totalPaye = travaux.reduce((s, t) => s + (t.paye_eur || 0), 0);
+    const totalSolde = travaux.reduce((s, t) => s + (t.solde_eur || 0), 0);
+    new Chart(document.getElementById('chart-travaux'), {
+      type: 'doughnut',
+      data: { labels: [lang === 'en' ? 'Paid' : 'Payé', lang === 'en' ? 'Outstanding' : 'Solde en attente'],
+        datasets: [{ data: [totalPaye, totalSolde],
+          backgroundColor: ['#14b8a6', '#ea580c'], borderColor: '#fff', borderWidth: 3 }] },
+      options: { cutout: '68%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 12 } } },
+          tooltip: { callbacks: { label: c => `${c.label}: ${fmtEUR(c.parsed, {fraction: 0})} (${((c.parsed/totalVote)*100).toFixed(1)} %)` } } } }
+    });
+    document.getElementById('travaux-cards').innerHTML = travaux.map(t => {
+      const pct = t.vote_eur ? Math.round((t.paye_eur / t.vote_eur) * 100) : 0;
+      return `
+        <div class="bg-white shadow-card rounded-xl p-5">
+          <div class="flex justify-between items-baseline gap-3">
+            <h3 class="font-display text-base font-semibold">${t.label}</h3>
+            <span class="chip bg-accent-50 text-accent-600">${pct} %</span>
+          </div>
+          <div class="mt-3 h-2 rounded-full bg-ink-900/5 overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-mint-500 to-accent-500" style="width:${pct}%"></div>
+          </div>
+          <dl class="mt-3 grid grid-cols-3 gap-2 text-xs">
+            <div><dt class="text-ink-500">${lang === 'en' ? 'Voted' : 'Voté'}</dt><dd class="num font-semibold">${fmtEUR(t.vote_eur, {fraction:0})}</dd></div>
+            <div><dt class="text-ink-500">${lang === 'en' ? 'Paid' : 'Payé'}</dt><dd class="num font-semibold text-mint-700">${fmtEUR(t.paye_eur, {fraction:0})}</dd></div>
+            <div><dt class="text-ink-500">${lang === 'en' ? 'Outstanding' : 'Solde'}</dt><dd class="num font-semibold text-accent-600">${fmtEUR(t.solde_eur, {fraction:0})}</dd></div>
+          </dl>
+        </div>`;
+    }).join('');
+    if (totalSolde > 50000) {
+      const note = document.getElementById('travaux-note');
+      note.classList.remove('hidden');
+      note.innerHTML = `<div class="text-[11px] uppercase tracking-[0.18em] font-semibold">${lang === 'en' ? 'Watch out' : 'À noter'}</div>
+        <p class="mt-2 text-ink-800">
+          ${lang === 'en'
+            ? `Total works <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voted · <strong class="text-rose-700">${fmtEUR(totalSolde, {fraction:0})}</strong> outstanding. Any cost overrun would land in future fund calls.`
+            : `Total chantier <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voté · <strong class="text-rose-700">${fmtEUR(totalSolde, {fraction:0})}</strong> restant à régler. Toute dérive impacterait massivement les appels de fonds futurs.`}
+        </p>`;
+    }
+  }
+
+  /* ----- owner cards ----- */
+  const o = data.owner || {};
+  const tantiemes_pct = o.tantiemes ? (o.tantiemes / 100) : null;
+  document.getElementById('owner-cards').innerHTML = `
+    <div class="bg-white shadow-card rounded-xl p-5">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.owner_title}</div>
+      <div class="mt-2 text-xl font-display">${o.name || '—'}</div>
+      ${o.address ? `<div class="mt-2 text-xs text-ink-500">${o.address}</div>` : ''}
+      ${o.lots ? `<div class="mt-1 text-xs text-ink-500">${o.lots}</div>` : ''}
+    </div>
+    <div class="bg-white shadow-card rounded-xl p-5">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.tantiemes}</div>
+      <div class="mt-2 text-3xl font-display num">${o.tantiemes ?? '—'}</div>
+      ${tantiemes_pct != null ? `<div class="mt-1 text-xs text-ink-500">${lang === 'en' ? `represented out of 10,000 (${tantiemes_pct.toFixed(2)} % of the copropriété)` : `représentés sur 10 000 (${tantiemes_pct.toFixed(2).replace('.', ',')} % de la copro)`}</div>` : ''}
+    </div>
+    <div class="bg-white shadow-card rounded-xl p-5">
+      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.fonds}</div>
+      <div class="mt-2 text-3xl font-display num">${o.fonds_alur_eur != null ? fmtEUR(o.fonds_alur_eur, {fraction: 2}) : '—'}</div>
+      <div class="mt-1 text-xs text-ink-500">${lang === 'en' ? 'Your share, Annexe N°8' : 'Quote-part — Annexe N°8'}</div>
+    </div>
+  `;
+
+  // Owner balance
+  const bal = data.owner?.balance_eur;
+  let balanceHTML = '';
+  if (bal == null) {
+    balanceHTML = `<div class="bg-mint-200/40 rounded-xl p-5 text-sm text-mint-700 border border-mint-200">
+      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${data.owner?.balance_note || L.balance_null}
+    </div>`;
+  } else if (bal > 0) {
+    balanceHTML = `<div class="bg-mint-200/40 rounded-xl p-5 text-sm text-mint-700 border border-mint-200">
+      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(bal, {fraction: 2})} ${lang === 'en' ? 'in your favor (créditeur)' : 'créditeur'}
+    </div>`;
+  } else {
+    balanceHTML = `<div class="bg-rose-200/40 rounded-xl p-5 text-sm text-rose-700 border border-rose-200">
+      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(Math.abs(bal), {fraction: 2})} ${lang === 'en' ? 'owed (débiteur)' : 'débiteur'}
+    </div>`;
+  }
+  document.getElementById('owner-balance').innerHTML = balanceHTML;
+
+  /* ----- footer ----- */
+  const ing = data.source?.ingested_at || '';
+  const pdfPages = data.source?.pdf_pages;
+  document.getElementById('footer-meta').textContent =
+    `${L.generated_from} ${ing}${pdfPages ? ` · ${pdfPages} ${L.pages}` : ''} · ag-copro v1.2`;
+})();
+</script>
+</body>
+</html>

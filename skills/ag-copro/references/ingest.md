@@ -104,9 +104,24 @@ If the name appears in neither: write "balance nulle ou non listé".
 
 For each, capture the euro amount and majority article. These are usually the highest-impact votes.
 
-## Step 4 — Write the summary file
+## Step 4 — Assemble the JSON payload and render the HTML report
 
-Follow the canonical structure in `summary-template.md`. Save to `~/.ag-copro/summaries/<slug>-<year>.md`.
+The output is a single interactive HTML file. **There is no markdown summary.**
+
+1. Build a JSON object matching the schema in `html-template.md`. Every value the user will read on the page comes from this object — be thorough.
+2. Compose the `briefing` array (3 to 7 items) **inside the JSON**, not as a separate prose block. Each item:
+   - `title` — 4–8 words.
+   - `resolutions` — array of résolution numbers as strings.
+   - `article` — `"24"`, `"25"`, `"26"`, `"25-1"`, `"26-1"`, or `"—"`.
+   - `body` — 1–3 sentences naming the euro amount (or "no euro amount"), the majority required, and why it matters.
+   - `severity` — `"high"` (budget jump, syndic change, big-ticket travaux), `"med"` (unusual but small), `"low"` (procedural quirks).
+   - Lead with the highest impact; the template numbers them 1, 2, 3 in display order.
+3. Read `references/html-template.html`. Substitute:
+   - `{{AG_DATA_JSON}}` → `JSON.stringify(payload, null, 2)` (preserve accents — `ensure_ascii=False` if using Python).
+   - `{{LANG}}` → `data.language` (`"fr"` or `"en"`).
+   - `{{YEAR}}` → first 4 chars of `data.meeting.date`.
+   - `{{RESIDENCE_TITLE}}` → `data.residence` (for the `<title>` tag).
+4. Write the result to `./ag-<slug>-<year>.html` in the user's **current working directory**.
 
 Slug rules:
 - Strip accents (`é` → `e`).
@@ -117,15 +132,18 @@ Slug rules:
 - Year is the **meeting year** (4 digits).
 
 Examples:
-- "LE VERGER A PALAISEAU", meeting 16/06/2026 → `le-verger-a-palaiseau-2026.md`
-- "17 RUE PHILIPPE DE DANGEAU", meeting 14/05/2025 → `17-rue-philippe-de-dangeau-2025.md`
+- "LE VERGER A PALAISEAU", meeting 16/06/2026 → `ag-le-verger-a-palaiseau-2026.html`
+- "17 RUE PHILIPPE DE DANGEAU", meeting 14/05/2025 → `ag-17-rue-philippe-de-dangeau-2025.html`
 
-## Step 5 — Output the Step Completion Report and the briefing
+**Overwrite protection**: if a file with that name already exists in CWD, ask the user before clobbering it.
 
-After saving, immediately:
+## Step 5 — Output the Step Completion Report and a short briefing
 
-1. Output the `◆ Ingest complete` Step Completion Report block (see SKILL.md for the format).
-2. Give a 5-bullet briefing of what to pay attention to. This is the "TL;DR" the user actually wants. Each bullet:
+After writing the HTML, immediately:
+
+1. Output the `◆ Ingest complete` Step Completion Report block (see SKILL.md for the format). Make sure the `Report saved to:` line shows the absolute path to the HTML.
+2. Tell the user how to open the report: "Ouvrez le fichier dans votre navigateur — toutes les charts et le tableau filtrable sont déjà dedans." (or English equivalent if the user wrote in English).
+3. Give a 3–5 bullet recap of what's in the briefing. **Keep this short** — the HTML already shows the full detail with severity color-coding. Each bullet:
    - Names the résolution numbers involved.
    - States the euro amount or the qualitative impact.
    - Says in one sentence why it matters.
@@ -141,11 +159,11 @@ Don't pad with procedural items (élection du président de séance, etc.) — t
 | VPàt Immo | More compact. Convocation cover + Ordre du jour + résolutions inline. Sometimes splits Annexes into separate sub-PDFs. Budget columns labelled with explicit dates. |
 | Foncia / Citya / Nexity | Similar to Immo de France but section ordering varies. Look for "ETAT FINANCIER" + "BUDGET PREVISIONNEL" rather than "Annexe N°X" labels. |
 
-If the syndic isn't on this list, fall back to landmark-based parsing. Don't fail — extract what you can and note the unknowns in the "Raw extraction notes" section of the summary.
+If the syndic isn't on this list, fall back to landmark-based parsing. Don't fail — extract what you can and add an `extra_notes` array to the JSON payload listing unknowns (the template ignores unknown keys but they remain readable by Query mode).
 
 ## Common pitfalls
 
-- **OCR drift in scanned tables**: Annexe pages are often image-scans of accounting software output. Numbers like `8 300,00` may come back as `8300.00` or `8 300, 00`. Normalize to `8300.00` (frontmatter) and `8 300,00 €` (prose).
+- **OCR drift in scanned tables**: Annexe pages are often image-scans of accounting software output. Numbers like `8 300,00` may come back as `8300.00` or `8 300, 00`. Normalize to the raw number `8300.00` in JSON — the template formats with `Intl.NumberFormat` for display (`8 300 €`).
 - **Two budgets, two votes**: documents often have an "Actualisation N+1" and a "Budget prévisionnel N+2" résolution. The first re-votes the current year (rarely refused); the second sets next year. Distinguish them clearly.
 - **Sans vote items**: items 4–6 in many AGs are informational ("Rapport du conseil syndical", "Information sur les procédures en cours"). Mark them but don't drag the user through them in the briefing.
 - **Reused résolution language**: some résolutions reference earlier ones ("Montant des honoraires du syndic pour la gestion des travaux objets de la résolution n° 22"). When summarizing, link them explicitly.

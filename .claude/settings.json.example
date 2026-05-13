@@ -1,0 +1,15 @@
+{
+  "_comment": "Example Claude Code permissions for working in francais-skills. Copy to settings.local.json to use: `cp .claude/settings.json.example .claude/settings.local.json`. settings.local.json is gitignored by Claude convention.",
+  "permissions": {
+    "allow": [
+      "Read(${CLAUDE_PROJECT_DIR}/**)",
+      "Bash(./install.sh)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)"
+    ]
+  }
+}
