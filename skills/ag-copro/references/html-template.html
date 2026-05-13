@@ -22,19 +22,54 @@
     theme: {
       extend: {
         fontFamily: {
-          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          sans: ['"Inter Tight"', 'Inter', 'ui-sans-serif', 'system-ui'],
           display: ['"Fraunces"', 'ui-serif', 'Georgia'],
           mono: ['"JetBrains Mono"', 'ui-monospace'],
         },
         colors: {
-          ink: { 950:'#0b1020', 900:'#101729', 800:'#1a2238', 700:'#2a3350', 500:'#5b6781', 300:'#a4adc4', 100:'#e9ecf5' },
-          accent: { 600:'#c2410c', 500:'#ea580c', 400:'#fb923c', 300:'#fdba74', 50:'#fff7ed' },
-          mint:   { 700:'#0f766e', 500:'#14b8a6', 200:'#99f6e4' },
-          amber:  { 700:'#b45309', 500:'#f59e0b', 200:'#fde68a' },
-          rose:   { 700:'#be123c', 500:'#f43f5e', 200:'#fecdd3' },
+          // Warm filmic palette — mirrors the logo-designer brand-showcase reference.
+          // "ink" remains the dominant neutral; tints map onto the warm paper family
+          // so existing utility classes (bg-ink-950, text-ink-500, etc.) re-skin for free.
+          ink: {
+            950: '#0B0A08',  // deepest — hero, budget band, footer
+            900: '#15120E',  // elevated dark surfaces
+            800: '#1F1A14',
+            700: '#3a342b',  // dark body text on light
+            500: '#8A8274',  // muted captions
+            300: '#CDC4B3',  // paper-dim — secondary text on dark
+            100: '#F4EFE6',  // paper — text on dark
+            50:  '#FAFAF7',  // page background
+          },
+          // Champagne accent — primary highlight, CTAs, italic accent words.
+          accent: {
+            700: '#B98A4D',
+            600: '#D98B5F',  // amber-warm — italics, links, hover
+            500: '#E9C38B',  // champagne — primary accent
+            400: '#F2D5A8',
+            300: '#F7E2C4',
+            50:  '#FBF4E7',
+          },
+          // Teal — trust signal, privacy/info accents.
+          mint: {
+            700: '#3F7470',
+            500: '#7AA2A0',  // teal
+            200: '#C7DBD9',
+          },
+          // Amber — warning / variation up.
+          amber: {
+            700: '#A86A3D',
+            500: '#D98B5F',
+            200: '#F2D5A8',
+          },
+          // Rose — danger / overspend.
+          rose: {
+            700: '#A04B3A',
+            500: '#C46B57',
+            200: '#E8C7BD',
+          },
         },
         boxShadow: {
-          card: '0 1px 0 rgba(16, 24, 40, 0.04), 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px -12px rgba(16, 24, 40, 0.12)',
+          card: '0 1px 0 rgba(11, 10, 8, 0.04), 0 10px 40px -20px rgba(11, 10, 8, 0.2)',
         }
       }
     }
@@ -42,36 +77,70 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { color-scheme: light; }
-  html, body { font-family: 'Inter', ui-sans-serif, system-ui; background: #f6f5f1; }
-  h1, h2, h3 { font-family: 'Fraunces', ui-serif; letter-spacing: -0.01em; }
+  :root {
+    color-scheme: light;
+    --ink: #0B0A08;
+    --ink-2: #15120E;
+    --paper: #F4EFE6;
+    --paper-dim: #CDC4B3;
+    --muted: #8A8274;
+    --line: rgba(11, 10, 8, 0.08);
+    --line-strong: rgba(244, 239, 230, 0.22);
+    --accent: #E9C38B;     /* champagne */
+    --accent-2: #D98B5F;   /* amber-warm */
+    --accent-3: #7AA2A0;   /* teal */
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { font-family: 'Inter Tight', 'Inter', ui-sans-serif, system-ui; background: #FAFAF7; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { font-family: 'Fraunces', ui-serif; letter-spacing: -0.02em; font-weight: 400; }
   .num { font-variant-numeric: tabular-nums; }
-  .hairline { border-color: rgba(11, 16, 32, 0.08); }
+  .hairline { border-color: var(--line); }
+  /* Section label — § + monospace, uppercase, letter-spaced, amber. */
+  .label-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent-2);
+  }
   .chip {
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.125rem 0.5rem; border-radius: 9999px;
-    font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
   }
-  .grid-paper {
-    background-image:
-      linear-gradient(rgba(11,16,32,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(11,16,32,0.03) 1px, transparent 1px);
-    background-size: 24px 24px;
+  /* Hero warmth — radial gradients on dark ink. */
+  .hero-glow {
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 20%, rgba(233, 195, 139, 0.22), transparent 60%),
+      radial-gradient(ellipse 40% 40% at 70% 70%, rgba(217, 139, 95, 0.15), transparent 60%);
   }
+  .mark-wrap {
+    width: 96px; height: 96px; display: grid; place-items: center;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(244, 239, 230, 0.06), rgba(244, 239, 230, 0.01));
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 0 80px rgba(233, 195, 139, 0.25);
+  }
+  /* Subtle warm card edge for residence/owner blocks. */
   .ribbon::before {
     content: ""; position: absolute; left: -1px; top: 1rem; bottom: 1rem; width: 3px;
-    background: linear-gradient(180deg, #ea580c, #f59e0b); border-radius: 3px;
+    background: linear-gradient(180deg, var(--accent-2), var(--accent)); border-radius: 3px;
   }
   details[open] > summary .chev { transform: rotate(90deg); }
   .chev { transition: transform 0.18s ease; }
-  ::selection { background: #fde68a; color: #1a2238; }
+  ::selection { background: var(--accent); color: var(--ink); }
+  .hero-title i { font-style: italic; color: var(--accent); font-weight: 500; }
+  .sec-title i  { font-style: italic; color: var(--accent-2); font-weight: 500; }
   @media print {
     .no-print { display: none !important; }
     html, body { background: white; }
     .shadow-card, .shadow-sm { box-shadow: none !important; }
     .break-before { break-before: page; }
+    /* Flatten dark bands so they print cleanly. */
+    .bg-ink-950, .bg-ink-900 { background: white !important; color: #15120E !important; }
+    .bg-ink-950 *, .bg-ink-900 * { color: #15120E !important; }
+    .ring-white\/10 { box-shadow: inset 0 0 0 1px rgba(11,10,8,.15) !important; }
   }
 </style>
 </head>
@@ -82,78 +151,97 @@
 {{AG_DATA_JSON}}
 </script>
 
-<header class="no-print sticky top-0 z-30 bg-[#f6f5f1]/85 backdrop-blur border-b hairline">
-  <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="size-8 rounded-md bg-ink-900 grid place-items-center text-white font-display font-bold">A</div>
-      <div>
-        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">ag-copro · rapport interactif</div>
-        <div class="text-sm font-semibold leading-tight" id="brand-title">…</div>
+<header class="no-print sticky top-0 z-30 bg-ink-50/90 backdrop-blur border-b hairline">
+  <div class="max-w-[1100px] mx-auto px-7 py-3 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="size-9 rounded-lg bg-ink-950 grid place-items-center">
+        <!-- Mark: serif "A" on champagne disc, a ballot frame around it. -->
+        <svg viewBox="0 0 32 32" class="w-6 h-6" aria-hidden="true">
+          <rect x="3" y="3" width="26" height="26" rx="6" fill="none" stroke="#E9C38B" stroke-width="1.5"/>
+          <text x="16" y="22" text-anchor="middle" font-family="Fraunces, serif" font-size="17" font-style="italic" fill="#E9C38B" font-weight="500">A</text>
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <div class="label-mono">ag-copro · rapport interactif</div>
+        <div class="text-sm font-medium leading-tight font-display truncate" id="brand-title">…</div>
       </div>
     </div>
     <nav class="hidden md:flex items-center gap-1 text-sm">
-      <a href="#meeting"      class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.meeting">Réunion</a>
-      <a href="#briefing"     class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.briefing">À retenir</a>
-      <a href="#resolutions"  class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.resolutions">Résolutions</a>
-      <a href="#budget"       class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.budget">Budget</a>
-      <a href="#travaux"      class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.travaux">Travaux</a>
-      <a href="#owner"        class="px-3 py-1.5 rounded-md hover:bg-ink-900/5" data-i18n="nav.owner">Mon lot</a>
+      <a href="#meeting"      class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.meeting">Réunion</a>
+      <a href="#briefing"     class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.briefing">À retenir</a>
+      <a href="#resolutions"  class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.resolutions">Résolutions</a>
+      <a href="#budget"       class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.budget">Budget</a>
+      <a href="#travaux"      class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.travaux">Travaux</a>
+      <a href="#owner"        class="px-3 py-1.5 rounded-md hover:bg-ink-950/5 text-ink-700" data-i18n="nav.owner">Mon lot</a>
     </nav>
-    <button onclick="window.print()" class="text-sm px-3 py-1.5 rounded-md bg-ink-900 text-white hover:bg-ink-800">Imprimer / PDF</button>
+    <button onclick="window.print()" class="text-sm px-3 py-1.5 rounded-md bg-ink-950 text-ink-100 hover:bg-ink-900 font-mono tracking-wider">Imprimer / PDF</button>
   </div>
 </header>
 
-<section class="relative grid-paper border-b hairline">
-  <div class="max-w-6xl mx-auto px-6 pt-12 pb-10">
-    <div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">
-      <span class="chip bg-accent-50 text-accent-600">Convocation</span>
-      <span class="chip bg-ink-900/5 text-ink-700">Assemblée Générale</span>
-      <span class="chip bg-mint-200 text-mint-700" id="hero-year">…</span>
+<section class="relative bg-ink-950 text-ink-100 overflow-hidden">
+  <div class="absolute inset-0 hero-glow"></div>
+  <div class="relative max-w-[1100px] mx-auto px-7 pt-20 pb-20">
+    <div class="flex items-center gap-5">
+      <div class="mark-wrap">
+        <svg viewBox="0 0 64 64" class="w-12 h-12" aria-hidden="true">
+          <rect x="6" y="6" width="52" height="52" rx="12" fill="none" stroke="#F4EFE6" stroke-width="2"/>
+          <path d="M44 14 L50 20 L26 44 L20 38 Z" fill="#E9C38B"/>
+          <text x="32" y="42" text-anchor="middle" font-family="Fraunces, serif" font-size="26" font-style="italic" fill="#F4EFE6" font-weight="400">A</text>
+        </svg>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="label-mono" style="color: var(--accent);">Convocation · v1.2</span>
+        <span class="chip" style="background: rgba(244, 239, 230, 0.08); color: var(--paper-dim);">Assemblée Générale</span>
+        <span class="chip" style="background: rgba(122, 162, 160, 0.18); color: var(--accent-3);" id="hero-year">…</span>
+      </div>
     </div>
-    <h1 id="hero-title" class="mt-4 text-5xl md:text-6xl font-display font-semibold leading-[1.02] text-ink-900">…</h1>
-    <p id="hero-tagline" class="mt-4 text-ink-500 max-w-2xl">…</p>
+    <h1 id="hero-title" class="hero-title mt-8 text-5xl md:text-7xl font-display font-light leading-[1.02] text-ink-100">…</h1>
+    <p id="hero-tagline" class="mt-5 font-display italic font-light text-xl md:text-2xl text-ink-300 max-w-2xl leading-snug">…</p>
 
-    <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-3" id="hero-cards"></div>
+    <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-3" id="hero-cards"></div>
   </div>
 </section>
 
-<section id="meeting" class="max-w-6xl mx-auto px-6 py-12">
-  <div class="flex items-baseline justify-between mb-6">
-    <h2 class="text-3xl font-display font-semibold">1. La réunion</h2>
-    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Section 1 · Meeting metadata</div>
+<section id="meeting" class="max-w-[1100px] mx-auto px-7 py-20 border-t hairline">
+  <span class="label-mono">§ Meeting</span>
+  <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
+    <h2 class="sec-title text-3xl md:text-4xl font-display font-light">1. La <i>réunion.</i></h2>
+    <div class="label-mono" style="color: var(--muted);">Section 1 · Meeting metadata</div>
   </div>
   <div class="grid md:grid-cols-2 gap-3" id="meeting-grid"></div>
 </section>
 
-<section id="briefing" class="bg-gradient-to-b from-[#f6f5f1] to-white border-y hairline">
-  <div class="max-w-6xl mx-auto px-6 py-14">
-    <div class="flex items-baseline justify-between mb-6">
+<section id="briefing" class="bg-ink-50 border-y hairline">
+  <div class="max-w-[1100px] mx-auto px-7 py-20">
+    <span class="label-mono">§ Briefing</span>
+    <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
       <div>
-        <h2 class="text-3xl font-display font-semibold">2. À retenir avant de voter</h2>
-        <p class="text-ink-500 mt-1 text-sm">Les points les plus importants — extraits des résolutions à enjeu et de l'Annexe N°3.</p>
+        <h2 class="sec-title text-3xl md:text-4xl font-display font-light">2. À retenir avant de <i>voter.</i></h2>
+        <p class="text-ink-500 mt-2 text-sm max-w-2xl">Les points les plus importants — extraits des résolutions à enjeu et de l'Annexe N°3.</p>
       </div>
-      <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Briefing</div>
+      <div class="label-mono" style="color: var(--muted);">À retenir</div>
     </div>
     <ol id="briefing-list" class="space-y-3"></ol>
   </div>
 </section>
 
-<section id="resolutions" class="max-w-6xl mx-auto px-6 py-14">
-  <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+<section id="resolutions" class="max-w-[1100px] mx-auto px-7 py-20">
+  <span class="label-mono">§ Resolutions</span>
+  <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
     <div>
-      <h2 class="text-3xl font-display font-semibold" id="resolutions-title">3. Les résolutions</h2>
-      <p class="text-ink-500 mt-1 text-sm">Filtrez par article, masquez les procédurales, cherchez par mot-clé.</p>
+      <h2 class="sec-title text-3xl md:text-4xl font-display font-light" id="resolutions-title">3. Les <i>résolutions.</i></h2>
+      <p class="text-ink-500 mt-2 text-sm max-w-2xl">Filtrez par article, masquez les procédurales, cherchez par mot-clé.</p>
     </div>
-    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Section 2 · Résolutions</div>
+    <div class="label-mono" style="color: var(--muted);">Section 2 · Résolutions</div>
   </div>
 
-  <div class="grid lg:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white shadow-card rounded-xl p-5 lg:col-span-1">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">Répartition par article</div>
-      <div class="relative h-64 mt-2"><canvas id="chart-resolutions"></canvas></div>
+  <div class="grid lg:grid-cols-3 gap-5 mb-8">
+    <div class="bg-white rounded-2xl shadow-card border hairline p-6 lg:col-span-1">
+      <div class="label-mono" style="color: var(--muted);">Répartition par article</div>
+      <div class="relative h-64 mt-3"><canvas id="chart-resolutions"></canvas></div>
     </div>
-    <div class="bg-white shadow-card rounded-xl p-5 lg:col-span-2 no-print">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold mb-3">Filtrer</div>
+    <div class="bg-white rounded-2xl shadow-card border hairline p-6 lg:col-span-2 no-print">
+      <div class="label-mono mb-3" style="color: var(--muted);">Filtrer</div>
       <div class="flex flex-wrap gap-2 mb-4" id="article-filters"></div>
       <div class="flex flex-wrap items-center gap-3">
         <label class="inline-flex items-center gap-2 text-sm">
@@ -162,22 +250,22 @@
         </label>
         <div class="flex-1 min-w-[200px] relative">
           <input id="search" type="search" placeholder="Chercher (ravalement, syndic, budget…)"
-                 class="w-full px-3 py-2 pl-9 rounded-md border hairline bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-300" />
+                 class="w-full px-3 py-2 pl-9 rounded-lg border hairline bg-white text-sm focus:outline-none focus:ring-2 focus:ring-accent-500/60" />
           <svg class="absolute left-2.5 top-2.5 size-4 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         </div>
-        <div class="text-xs text-ink-500" id="result-count"></div>
+        <div class="label-mono" id="result-count" style="color: var(--muted);"></div>
       </div>
     </div>
   </div>
 
-  <div class="bg-white shadow-card rounded-xl overflow-hidden">
+  <div class="bg-white rounded-2xl shadow-card border hairline overflow-hidden">
     <table class="w-full text-sm">
-      <thead class="bg-ink-900/5 text-[11px] uppercase tracking-[0.12em] text-ink-500">
-        <tr>
-          <th class="text-left px-4 py-3 w-14">N°</th>
-          <th class="text-left px-4 py-3">Titre</th>
-          <th class="text-left px-4 py-3 w-28">Article</th>
-          <th class="text-right px-4 py-3 w-32">Montant</th>
+      <thead class="bg-ink-50 border-b hairline">
+        <tr class="label-mono" style="color: var(--muted);">
+          <th class="text-left px-4 py-3 w-14 font-normal">N°</th>
+          <th class="text-left px-4 py-3 font-normal">Titre</th>
+          <th class="text-left px-4 py-3 w-28 font-normal">Article</th>
+          <th class="text-right px-4 py-3 w-32 font-normal">Montant</th>
         </tr>
       </thead>
       <tbody id="resolutions-tbody" class="divide-y hairline"></tbody>
@@ -185,70 +273,74 @@
   </div>
 </section>
 
-<section id="budget" class="bg-ink-950 text-ink-100 break-before">
-  <div class="max-w-6xl mx-auto px-6 py-14">
-    <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+<section id="budget" class="bg-ink-950 text-ink-100 break-before relative overflow-hidden">
+  <div class="absolute inset-0 hero-glow opacity-60"></div>
+  <div class="relative max-w-[1100px] mx-auto px-7 py-20">
+    <span class="label-mono" style="color: var(--accent);">§ Budget</span>
+    <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
       <div>
-        <h2 class="text-3xl font-display font-semibold text-white">4. Le budget en clair</h2>
-        <p class="text-ink-300 mt-1 text-sm">Annexe N°3 du document — comparaison année par année + lignes qui bougent.</p>
+        <h2 class="sec-title text-3xl md:text-4xl font-display font-light text-ink-100">4. Le budget, <i>en clair.</i></h2>
+        <p class="text-ink-300 mt-2 text-sm max-w-2xl">Annexe N°3 du document — comparaison année par année + lignes qui bougent.</p>
       </div>
-      <div class="text-xs text-ink-300 uppercase tracking-[0.18em]">Section 3 · Financial Y-o-Y</div>
+      <div class="label-mono" style="color: var(--paper-dim);">Section 3 · Financial Y-o-Y</div>
     </div>
-    <div class="grid lg:grid-cols-5 gap-6">
-      <div class="bg-white/5 ring-1 ring-white/10 rounded-xl p-5 lg:col-span-3">
-        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold mb-2">Totaux par exercice</div>
+    <div class="grid lg:grid-cols-5 gap-5">
+      <div class="rounded-2xl p-6 lg:col-span-3" style="background: rgba(244, 239, 230, 0.04); border: 1px solid var(--line-strong);">
+        <div class="label-mono mb-3" style="color: var(--paper-dim);">Totaux par exercice</div>
         <div class="relative h-72"><canvas id="chart-budget"></canvas></div>
       </div>
-      <div class="bg-white/5 ring-1 ring-white/10 rounded-xl p-5 lg:col-span-2 text-sm" id="budget-summary"></div>
+      <div class="rounded-2xl p-6 lg:col-span-2 text-sm" id="budget-summary" style="background: rgba(244, 239, 230, 0.04); border: 1px solid var(--line-strong);"></div>
     </div>
-    <div class="mt-8 bg-white/5 ring-1 ring-white/10 rounded-xl p-5">
-      <div class="flex items-baseline justify-between mb-4">
-        <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold">Lignes notables — variation N+2 vs N voté</div>
-        <div class="text-xs text-ink-300" id="lines-count"></div>
+    <div class="mt-6 rounded-2xl p-6" style="background: rgba(244, 239, 230, 0.04); border: 1px solid var(--line-strong);">
+      <div class="flex items-baseline justify-between mb-4 flex-wrap gap-2">
+        <div class="label-mono" style="color: var(--paper-dim);">Lignes notables — variation N+2 vs N voté</div>
+        <div class="label-mono" id="lines-count" style="color: var(--paper-dim);"></div>
       </div>
       <div class="relative h-[420px]"><canvas id="chart-lines"></canvas></div>
     </div>
   </div>
 </section>
 
-<section id="travaux" class="max-w-6xl mx-auto px-6 py-14">
-  <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+<section id="travaux" class="max-w-[1100px] mx-auto px-7 py-20">
+  <span class="label-mono">§ Travaux</span>
+  <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
     <div>
-      <h2 class="text-3xl font-display font-semibold">5. Travaux exceptionnels</h2>
-      <p class="text-ink-500 mt-1 text-sm">Chantiers votés antérieurement — pas de re-vote à cette AG, mais c'est souvent le poste le plus lourd.</p>
+      <h2 class="sec-title text-3xl md:text-4xl font-display font-light">5. Travaux <i>exceptionnels.</i></h2>
+      <p class="text-ink-500 mt-2 text-sm max-w-2xl">Chantiers votés antérieurement — pas de re-vote à cette AG, mais c'est souvent le poste le plus lourd.</p>
     </div>
-    <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Annexes N°2 & N°5</div>
+    <div class="label-mono" style="color: var(--muted);">Annexes N°2 & N°5</div>
   </div>
-  <div class="grid lg:grid-cols-2 gap-6">
-    <div class="bg-white shadow-card rounded-xl p-6">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">Avancement global</div>
+  <div class="grid lg:grid-cols-2 gap-5">
+    <div class="bg-white rounded-2xl shadow-card border hairline p-7">
+      <div class="label-mono" style="color: var(--muted);">Avancement global</div>
       <div class="relative h-72 mt-3"><canvas id="chart-travaux"></canvas></div>
     </div>
     <div class="space-y-3">
       <div id="travaux-cards" class="space-y-3"></div>
-      <div id="travaux-note" class="bg-amber-50 rounded-xl p-5 border border-amber-200 text-sm text-amber-700 hidden"></div>
+      <div id="travaux-note" class="rounded-2xl p-6 text-sm hidden" style="background: var(--accent); color: var(--ink);"></div>
     </div>
   </div>
 </section>
 
-<section id="owner" class="bg-gradient-to-b from-white to-[#f6f5f1] border-t hairline">
-  <div class="max-w-6xl mx-auto px-6 py-14">
-    <div class="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+<section id="owner" class="bg-ink-50 border-t hairline">
+  <div class="max-w-[1100px] mx-auto px-7 py-20">
+    <span class="label-mono">§ Owner</span>
+    <div class="flex items-baseline justify-between mt-3 mb-8 flex-wrap gap-3">
       <div>
-        <h2 class="text-3xl font-display font-semibold">6. Mon lot</h2>
-        <p class="text-ink-500 mt-1 text-sm">Données spécifiques au copropriétaire — Annexes N°6 et N°8.</p>
+        <h2 class="sec-title text-3xl md:text-4xl font-display font-light">6. Mon <i>lot.</i></h2>
+        <p class="text-ink-500 mt-2 text-sm max-w-2xl">Données spécifiques au copropriétaire — Annexes N°6 et N°8.</p>
       </div>
-      <div class="text-xs text-ink-500 uppercase tracking-[0.18em]">Owner-specific</div>
+      <div class="label-mono" style="color: var(--muted);">Owner-specific</div>
     </div>
     <div class="grid md:grid-cols-3 gap-3" id="owner-cards"></div>
     <div id="owner-balance" class="mt-4"></div>
   </div>
 </section>
 
-<footer class="max-w-6xl mx-auto px-6 py-10 text-xs text-ink-500">
-  <div class="flex flex-wrap gap-4 justify-between">
+<footer class="bg-ink-950 text-ink-300 py-12 mt-0">
+  <div class="max-w-[1100px] mx-auto px-7 flex flex-wrap gap-4 justify-between items-center text-xs font-mono">
     <div id="footer-meta">…</div>
-    <div>Ce rapport ne constitue pas un conseil juridique. Décidez avec votre conseil syndical.</div>
+    <div class="font-display italic text-ink-100" style="color: var(--paper-dim);">Ce rapport ne constitue pas un conseil juridique. Décidez avec votre conseil syndical.</div>
   </div>
 </footer>
 
@@ -303,9 +395,9 @@
   if (parts.length >= 2) {
     const head = parts.slice(0, parts.length - 1).join(' ');
     const tail = parts[parts.length - 1];
-    heroHTML = `${head} <span class="italic text-accent-600">${tail}</span>`;
+    heroHTML = `${head} <i>${tail}</i>`;
   } else {
-    heroHTML = `<span class="italic text-accent-600">${r}</span>`;
+    heroHTML = `<i>${r}</i>`;
   }
   document.getElementById('hero-title').innerHTML = heroHTML;
   document.getElementById('hero-tagline').textContent =
@@ -318,25 +410,24 @@
     {
       label: L.meeting,
       title: data.meeting?.date_fr || data.meeting?.date || '—',
-      sub: (data.meeting?.time ? (lang === 'en' ? '' : '') + data.meeting.time : '—'),
+      sub: (data.meeting?.time || ''),
       foot: data.meeting?.location || '',
     },
     {
       label: L.deadline,
-      title: data.meeting?.vote_correspondence_deadline_fr || data.meeting?.vote_correspondence_deadline || '—',
-      titleClass: 'text-rose-700',
+      title: `<span class="italic" style="color: var(--accent);">${data.meeting?.vote_correspondence_deadline_fr || data.meeting?.vote_correspondence_deadline || '—'}</span>`,
       sub: lang === 'en' ? '3 working days before AG' : '3 jours francs avant l\'AG',
-      foot: data.meeting?.return_email ? `${L.return_to}: <span class="font-mono">${data.meeting.return_email}</span>` : '',
+      foot: data.meeting?.return_email ? `${L.return_to}: <span class="font-mono" style="color: var(--accent);">${data.meeting.return_email}</span>` : '',
     },
     {
       label: L.budget,
       title: fmtEUR(data.budget?.n_plus_2_eur, {fraction:0}),
-      sub: `<span class="text-accent-600 font-semibold num">${fmtPct(data.budget?.delta_pct)} vs ${data.budget?.n_label || 'N'}</span>`,
+      sub: `<span class="num font-medium" style="color: var(--accent);">${fmtPct(data.budget?.delta_pct)} vs ${data.budget?.n_label || 'N'}</span>`,
       foot: '',
     },
     {
       label: L.owner,
-      title: `${data.owner?.tantiemes ?? '—'} <span class="text-ink-300 text-base">/ 10 000</span>`,
+      title: `${data.owner?.tantiemes ?? '—'} <span class="text-base" style="color: var(--paper-dim);">/ 10 000</span>`,
       sub: data.owner?.lots || '',
       foot: data.owner?.balance_eur != null
         ? `Solde: ${fmtEUR(data.owner.balance_eur)}`
@@ -344,31 +435,34 @@
     }
   ];
   document.getElementById('hero-cards').innerHTML = heroCards.map(c => `
-    <div class="relative bg-white shadow-card rounded-xl p-5 ribbon">
-      <div class="text-[11px] uppercase tracking-[0.16em] text-ink-500 font-semibold">${c.label}</div>
-      <div class="mt-2 text-2xl font-display font-semibold leading-tight ${c.titleClass || ''} num">${c.title}</div>
-      <div class="text-sm text-ink-500">${c.sub || ''}</div>
-      ${c.foot ? `<div class="mt-3 text-xs text-ink-500">${c.foot}</div>` : ''}
+    <div class="relative rounded-2xl p-5 ribbon" style="background: rgba(244, 239, 230, 0.06); border: 1px solid var(--line-strong);">
+      <div class="label-mono" style="color: var(--accent);">${c.label}</div>
+      <div class="mt-2 text-2xl font-display font-light leading-tight ${c.titleClass || 'text-ink-100'} num">${c.title}</div>
+      <div class="text-sm" style="color: var(--paper-dim);">${c.sub || ''}</div>
+      ${c.foot ? `<div class="mt-3 text-xs" style="color: var(--paper-dim);">${c.foot}</div>` : ''}
     </div>
   `).join('');
 
   /* ----- meeting block ----- */
   const m = data.meeting || {};
   document.getElementById('meeting-grid').innerHTML = `
-    <dl class="bg-white shadow-card rounded-xl p-6 space-y-3 text-sm">
-      ${m.date_fr ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.meeting}</dt><dd class="font-medium text-right">${m.date_fr}${m.time ? ' — ' + m.time : ''}</dd></div>` : ''}
-      ${m.location ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.loc}</dt><dd class="font-medium text-right">${m.location}</dd></div>` : ''}
-      ${data.syndic ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.syndic}</dt><dd class="font-medium text-right">${data.syndic}${data.syndic_address ? `<br><span class="text-ink-500 font-normal">${data.syndic_address}</span>` : ''}</dd></div>` : ''}
-      ${m.dossier_ref ? `<div class="flex justify-between gap-6"><dt class="text-ink-500">${L.ref}</dt><dd class="font-mono text-xs text-ink-700 text-right">${m.dossier_ref}</dd></div>` : ''}
+    <dl class="bg-white shadow-card border hairline rounded-2xl p-7 space-y-3 text-sm">
+      ${m.date_fr ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.meeting}</dt><dd class="font-medium text-right text-ink-900">${m.date_fr}${m.time ? ' — ' + m.time : ''}</dd></div>` : ''}
+      ${m.location ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.loc}</dt><dd class="font-medium text-right text-ink-900">${m.location}</dd></div>` : ''}
+      ${data.syndic ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.syndic}</dt><dd class="font-medium text-right text-ink-900">${data.syndic}${data.syndic_address ? `<br><span class="text-ink-500 font-normal text-xs">${data.syndic_address}</span>` : ''}</dd></div>` : ''}
+      ${m.dossier_ref ? `<div class="flex justify-between gap-6"><dt class="label-mono" style="color: var(--muted);">${L.ref}</dt><dd class="font-mono text-xs text-ink-700 text-right">${m.dossier_ref}</dd></div>` : ''}
     </dl>
-    <div class="bg-ink-900 text-white rounded-xl p-6 shadow-card">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-accent-300 font-semibold">${L.deadline}</div>
-      <p class="mt-2 text-2xl font-display">${lang === 'en' ? 'By' : 'Avant le'} <span class="text-accent-300">${m.vote_correspondence_deadline_fr || m.vote_correspondence_deadline || '—'}</span></p>
-      <p class="mt-3 text-sm text-ink-100/80 leading-relaxed">${lang === 'en' ? 'Per French Law 10/07/1965 art. 17-1 A — 3 working days before the meeting. Online vote often available up to 3 days before via the syndic\'s portal.' : 'Conformément à la loi du 10/07/1965 art. 17-1 A — délai de 3 jours francs avant la séance. Vote en ligne possible jusqu\'à 3 jours avant l\'AG depuis l\'espace client.'}</p>
-      <ul class="mt-4 text-sm space-y-1.5 text-ink-100">
-        ${m.return_email ? `<li><span class="text-ink-300">Email :</span> <span class="font-mono text-accent-300">${m.return_email}</span></li>` : ''}
-        ${m.return_postal ? `<li><span class="text-ink-300">${lang === 'en' ? 'Postal' : 'Postal'} :</span> ${m.return_postal}</li>` : ''}
-      </ul>
+    <div class="rounded-2xl p-7 relative overflow-hidden text-ink-100" style="background: var(--ink); border: 1px solid var(--line-strong);">
+      <div class="absolute inset-0 hero-glow opacity-40"></div>
+      <div class="relative">
+        <div class="label-mono" style="color: var(--accent);">${L.deadline}</div>
+        <p class="mt-3 text-2xl md:text-3xl font-display font-light">${lang === 'en' ? 'By' : 'Avant le'} <span class="italic" style="color: var(--accent);">${m.vote_correspondence_deadline_fr || m.vote_correspondence_deadline || '—'}</span></p>
+        <p class="mt-3 text-sm leading-relaxed" style="color: var(--paper-dim);">${lang === 'en' ? 'Per French Law 10/07/1965 art. 17-1 A — 3 working days before the meeting. Online vote often available up to 3 days before via the syndic\'s portal.' : 'Conformément à la loi du 10/07/1965 art. 17-1 A — délai de 3 jours francs avant la séance. Vote en ligne possible jusqu\'à 3 jours avant l\'AG depuis l\'espace client.'}</p>
+        <ul class="mt-4 text-sm space-y-1.5 text-ink-100">
+          ${m.return_email ? `<li><span style="color: var(--paper-dim);">Email :</span> <span class="font-mono" style="color: var(--accent);">${m.return_email}</span></li>` : ''}
+          ${m.return_postal ? `<li><span style="color: var(--paper-dim);">${lang === 'en' ? 'Postal' : 'Postal'} :</span> ${m.return_postal}</li>` : ''}
+        </ul>
+      </div>
     </div>
   `;
 
@@ -376,7 +470,7 @@
   const sev = {
     high: { ring: 'ring-rose-200', dot: 'bg-rose-500', chip: 'bg-rose-200 text-rose-700' },
     med:  { ring: 'ring-amber-200', dot: 'bg-amber-500', chip: 'bg-amber-200 text-amber-700' },
-    low:  { ring: 'ring-ink-900/10', dot: 'bg-ink-700', chip: 'bg-ink-900/5 text-ink-700' },
+    low:  { ring: 'ring-mint-200', dot: 'bg-mint-500', chip: 'bg-mint-200 text-mint-700' },
   };
   const briefings = data.briefing || [];
   document.getElementById('briefing-list').innerHTML = briefings.length === 0
@@ -384,15 +478,15 @@
     : briefings.map((b, i) => {
         const c = sev[b.severity] || sev.low;
         return `
-          <li class="bg-white shadow-card rounded-xl p-5 flex gap-4 ring-1 ${c.ring}">
-            <div class="shrink-0 size-8 rounded-md ${c.dot} text-white grid place-items-center font-display font-semibold text-sm">${i+1}</div>
-            <div class="flex-1">
+          <li class="bg-white shadow-card border hairline rounded-2xl p-6 flex gap-5 ring-1 ${c.ring}">
+            <div class="shrink-0 size-9 rounded-lg ${c.dot} text-ink-100 grid place-items-center font-display italic font-medium text-base">${i+1}</div>
+            <div class="flex-1 min-w-0">
               <div class="flex flex-wrap items-baseline gap-2">
-                <h3 class="font-display text-lg font-semibold">${b.title}</h3>
+                <h3 class="font-display text-xl font-light">${b.title}</h3>
                 ${b.resolutions && b.resolutions.length ? `<span class="chip ${c.chip}">Rés ${b.resolutions.join(', ')}</span>` : ''}
-                ${b.article ? `<span class="chip bg-ink-900/5 text-ink-700">Art. ${b.article}</span>` : ''}
+                ${b.article ? `<span class="chip bg-ink-50 text-ink-700 border hairline">Art. ${b.article}</span>` : ''}
               </div>
-              <p class="mt-1.5 text-sm text-ink-700 leading-relaxed">${b.body}</p>
+              <p class="mt-2 text-sm text-ink-700 leading-relaxed">${b.body}</p>
             </div>
           </li>`;
       }).join('');
@@ -467,6 +561,13 @@
   renderTable();
 
   /* ----- charts ----- */
+  // Shared palette — kept in sync with the warm filmic CSS variables.
+  const COL = {
+    champagne: '#E9C38B', amber: '#D98B5F', teal: '#7AA2A0',
+    paperDim:  '#CDC4B3', muted: '#8A8274', ink: '#15120E',
+    paper:     '#F4EFE6', tealDeep: '#3F7470', rose: '#C46B57',
+  };
+
   // Résolutions donut
   new Chart(document.getElementById('chart-resolutions'), {
     type: 'doughnut',
@@ -474,12 +575,12 @@
       labels: articleKeys,
       datasets: [{
         data: articleKeys.map(k => articleCounts[k]),
-        backgroundColor: ['#14b8a6', '#f43f5e', '#f59e0b', '#a4adc4', '#5b6781', '#0f766e', '#ea580c'],
-        borderColor: '#fff', borderWidth: 2,
+        backgroundColor: [COL.teal, COL.rose, COL.amber, COL.paperDim, COL.muted, COL.tealDeep, COL.champagne],
+        borderColor: COL.paper, borderWidth: 2,
       }]
     },
-    options: { cutout: '62%',
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+    options: { cutout: '64%',
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, family: 'JetBrains Mono' }, color: COL.muted } },
         tooltip: { callbacks: { label: c => `${c.label}: ${c.parsed}` } } } }
   });
 
@@ -497,14 +598,14 @@
       labels: budgetLabels,
       datasets: [{
         type: 'bar', label: 'Montant (€)', data: budgetValues,
-        backgroundColor: ['rgba(164,173,196,0.55)', 'rgba(20,184,166,0.55)', 'rgba(251,146,60,0.65)', 'rgba(234,88,12,0.85)'],
-        borderColor: ['#a4adc4', '#14b8a6', '#fb923c', '#ea580c'], borderWidth: 1, borderRadius: 6,
+        backgroundColor: ['rgba(205,196,179,0.40)', 'rgba(122,162,160,0.55)', 'rgba(233,195,139,0.75)', 'rgba(217,139,95,0.90)'],
+        borderColor: [COL.paperDim, COL.teal, COL.champagne, COL.amber], borderWidth: 1, borderRadius: 6,
       }]
     },
     options: { plugins: { legend: { display: false },
         tooltip: { callbacks: { label: c => fmtEUR(c.parsed.y, {fraction: 0}) } } },
-      scales: { x: { ticks: { color: '#a4adc4' }, grid: { display: false } },
-        y: { ticks: { color: '#a4adc4', callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(255,255,255,0.06)' } } } }
+      scales: { x: { ticks: { color: COL.paperDim, font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: COL.paperDim, font: { family: 'JetBrains Mono', size: 10 }, callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(244,239,230,0.06)' } } } }
   });
 
   // Budget summary (key takeaway)
@@ -518,20 +619,20 @@
   const decreases = [...lines].sort((a, b) => (a.n_plus_2 - a.n_vote) - (b.n_plus_2 - b.n_vote))
     .filter(l => l.n_plus_2 - l.n_vote < -500).slice(0, 3);
   document.getElementById('budget-summary').innerHTML = `
-    <div class="text-[11px] uppercase tracking-[0.18em] text-ink-300 font-semibold">${L.read_key}</div>
-    <p class="mt-3 text-ink-100 leading-relaxed">
+    <div class="label-mono" style="color: var(--accent);">${L.read_key}</div>
+    <p class="mt-3 font-display italic font-light text-xl leading-snug" style="color: var(--paper);">
       ${lang === 'en'
-        ? `Overall change <span class="num text-accent-300 font-semibold">${fmtPct(b.delta_pct)}</span>.`
-        : `Variation globale <span class="num text-accent-300 font-semibold">${fmtPct(b.delta_pct)}</span>.`}
+        ? `Overall change <span class="num not-italic font-medium" style="color: var(--accent);">${fmtPct(b.delta_pct)}</span>.`
+        : `Variation globale <span class="num not-italic font-medium" style="color: var(--accent);">${fmtPct(b.delta_pct)}</span>.`}
     </p>
-    ${increases.length ? `<ul class="mt-3 space-y-2">${increases.map(l => `
-        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num text-accent-300 font-semibold">+${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+    ${increases.length ? `<ul class="mt-4 space-y-2 text-sm" style="color: var(--paper);">${increases.map(l => `
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num font-medium" style="color: var(--accent);">+${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
       `).join('')}</ul>` : ''}
-    ${decreases.length ? `<p class="mt-4 text-ink-300">${L.also_compensated}</p>
-      <ul class="mt-2 space-y-2">${decreases.map(l => `
-        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num text-mint-200 font-semibold">${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
+    ${decreases.length ? `<p class="mt-4 text-sm" style="color: var(--paper-dim);">${L.also_compensated}</p>
+      <ul class="mt-2 space-y-2 text-sm" style="color: var(--paper);">${decreases.map(l => `
+        <li class="flex justify-between gap-3"><span>${l.compte} ${l.label}</span><span class="num font-medium" style="color: var(--accent-3);">${fmtEUR(l.n_plus_2 - l.n_vote, {fraction:0})}</span></li>
       `).join('')}</ul>` : ''}
-    ${b.excedent_2025_eur != null ? `<p class="mt-4 text-xs text-ink-300">${L.excedent} <span class="num text-white">${fmtEUR(b.excedent_2025_eur, {fraction: 2})}</span>.</p>` : ''}
+    ${b.excedent_2025_eur != null ? `<p class="mt-4 text-xs" style="color: var(--paper-dim);">${L.excedent} <span class="num" style="color: var(--paper);">${fmtEUR(b.excedent_2025_eur, {fraction: 2})}</span>.</p>` : ''}
   `;
 
   // Budget line items (horizontal bar)
@@ -541,16 +642,16 @@
       labels: top.map(l => l.label),
       datasets: [
         { label: b.n_label || 'N voté', data: top.map(l => l.n_vote),
-          backgroundColor: 'rgba(164,173,196,0.45)', borderColor: '#a4adc4', borderWidth: 1 },
+          backgroundColor: 'rgba(205,196,179,0.35)', borderColor: COL.paperDim, borderWidth: 1 },
         { label: b.n_plus_2_label || 'N+2', data: top.map(l => l.n_plus_2),
-          backgroundColor: 'rgba(251,146,60,0.75)', borderColor: '#ea580c', borderWidth: 1 }
+          backgroundColor: 'rgba(217,139,95,0.80)', borderColor: COL.amber, borderWidth: 1 }
       ]
     },
     options: { indexAxis: 'y',
-      plugins: { legend: { labels: { color: '#e9ecf5', boxWidth: 10 } },
+      plugins: { legend: { labels: { color: COL.paper, boxWidth: 10, font: { family: 'JetBrains Mono', size: 10 } } },
         tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtEUR(c.parsed.x, {fraction: 0})}` } } },
-      scales: { x: { ticks: { color: '#a4adc4', callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(255,255,255,0.06)' } },
-        y: { ticks: { color: '#e9ecf5', font: { size: 11 } }, grid: { display: false } } } }
+      scales: { x: { ticks: { color: COL.paperDim, font: { family: 'JetBrains Mono', size: 10 }, callback: v => fmtEUR(v, {fraction: 0}) }, grid: { color: 'rgba(244,239,230,0.06)' } },
+        y: { ticks: { color: COL.paper, font: { size: 11 } }, grid: { display: false } } } }
   });
 
   /* ----- travaux ----- */
@@ -565,37 +666,37 @@
       type: 'doughnut',
       data: { labels: [lang === 'en' ? 'Paid' : 'Payé', lang === 'en' ? 'Outstanding' : 'Solde en attente'],
         datasets: [{ data: [totalPaye, totalSolde],
-          backgroundColor: ['#14b8a6', '#ea580c'], borderColor: '#fff', borderWidth: 3 }] },
+          backgroundColor: [COL.teal, COL.amber], borderColor: COL.paper, borderWidth: 3 }] },
       options: { cutout: '68%',
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 12 } } },
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, family: 'JetBrains Mono' }, color: COL.muted } },
           tooltip: { callbacks: { label: c => `${c.label}: ${fmtEUR(c.parsed, {fraction: 0})} (${((c.parsed/totalVote)*100).toFixed(1)} %)` } } } }
     });
     document.getElementById('travaux-cards').innerHTML = travaux.map(t => {
       const pct = t.vote_eur ? Math.round((t.paye_eur / t.vote_eur) * 100) : 0;
       return `
-        <div class="bg-white shadow-card rounded-xl p-5">
+        <div class="bg-white shadow-card border hairline rounded-2xl p-6">
           <div class="flex justify-between items-baseline gap-3">
-            <h3 class="font-display text-base font-semibold">${t.label}</h3>
-            <span class="chip bg-accent-50 text-accent-600">${pct} %</span>
+            <h3 class="font-display text-lg font-light">${t.label}</h3>
+            <span class="chip" style="background: var(--accent-50, #FBF4E7); color: var(--accent-2); border: 1px solid var(--accent);">${pct} %</span>
           </div>
-          <div class="mt-3 h-2 rounded-full bg-ink-900/5 overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-mint-500 to-accent-500" style="width:${pct}%"></div>
+          <div class="mt-4 h-1.5 rounded-full bg-ink-50 overflow-hidden">
+            <div class="h-full" style="width:${pct}%; background: linear-gradient(90deg, var(--accent-3), var(--accent));"></div>
           </div>
-          <dl class="mt-3 grid grid-cols-3 gap-2 text-xs">
-            <div><dt class="text-ink-500">${lang === 'en' ? 'Voted' : 'Voté'}</dt><dd class="num font-semibold">${fmtEUR(t.vote_eur, {fraction:0})}</dd></div>
-            <div><dt class="text-ink-500">${lang === 'en' ? 'Paid' : 'Payé'}</dt><dd class="num font-semibold text-mint-700">${fmtEUR(t.paye_eur, {fraction:0})}</dd></div>
-            <div><dt class="text-ink-500">${lang === 'en' ? 'Outstanding' : 'Solde'}</dt><dd class="num font-semibold text-accent-600">${fmtEUR(t.solde_eur, {fraction:0})}</dd></div>
+          <dl class="mt-4 grid grid-cols-3 gap-2 text-xs">
+            <div><dt class="label-mono" style="color: var(--muted);">${lang === 'en' ? 'Voted' : 'Voté'}</dt><dd class="num font-medium text-ink-900 mt-1">${fmtEUR(t.vote_eur, {fraction:0})}</dd></div>
+            <div><dt class="label-mono" style="color: var(--muted);">${lang === 'en' ? 'Paid' : 'Payé'}</dt><dd class="num font-medium mt-1" style="color: var(--accent-3);">${fmtEUR(t.paye_eur, {fraction:0})}</dd></div>
+            <div><dt class="label-mono" style="color: var(--muted);">${lang === 'en' ? 'Outstanding' : 'Solde'}</dt><dd class="num font-medium mt-1" style="color: var(--accent-2);">${fmtEUR(t.solde_eur, {fraction:0})}</dd></div>
           </dl>
         </div>`;
     }).join('');
     if (totalSolde > 50000) {
       const note = document.getElementById('travaux-note');
       note.classList.remove('hidden');
-      note.innerHTML = `<div class="text-[11px] uppercase tracking-[0.18em] font-semibold">${lang === 'en' ? 'Watch out' : 'À noter'}</div>
-        <p class="mt-2 text-ink-800">
+      note.innerHTML = `<div class="label-mono" style="color: var(--ink);">${lang === 'en' ? 'Watch out' : 'À noter'}</div>
+        <p class="mt-2 text-ink-900 leading-relaxed">
           ${lang === 'en'
-            ? `Total works <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voted · <strong class="text-rose-700">${fmtEUR(totalSolde, {fraction:0})}</strong> outstanding. Any cost overrun would land in future fund calls.`
-            : `Total chantier <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voté · <strong class="text-rose-700">${fmtEUR(totalSolde, {fraction:0})}</strong> restant à régler. Toute dérive impacterait massivement les appels de fonds futurs.`}
+            ? `Total works <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voted · <strong style="color: var(--ink); font-style: italic;">${fmtEUR(totalSolde, {fraction:0})}</strong> outstanding. Any cost overrun would land in future fund calls.`
+            : `Total chantier <strong>${fmtEUR(totalVote, {fraction:0})}</strong> voté · <strong style="color: var(--ink); font-style: italic;">${fmtEUR(totalSolde, {fraction:0})}</strong> restant à régler. Toute dérive impacterait massivement les appels de fonds futurs.`}
         </p>`;
     }
   }
@@ -604,21 +705,21 @@
   const o = data.owner || {};
   const tantiemes_pct = o.tantiemes ? (o.tantiemes / 100) : null;
   document.getElementById('owner-cards').innerHTML = `
-    <div class="bg-white shadow-card rounded-xl p-5">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.owner_title}</div>
-      <div class="mt-2 text-xl font-display">${o.name || '—'}</div>
+    <div class="bg-white shadow-card border hairline rounded-2xl p-6 relative ribbon">
+      <div class="label-mono" style="color: var(--muted);">${L.owner_title}</div>
+      <div class="mt-2 text-2xl font-display font-light">${o.name || '—'}</div>
       ${o.address ? `<div class="mt-2 text-xs text-ink-500">${o.address}</div>` : ''}
       ${o.lots ? `<div class="mt-1 text-xs text-ink-500">${o.lots}</div>` : ''}
     </div>
-    <div class="bg-white shadow-card rounded-xl p-5">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.tantiemes}</div>
-      <div class="mt-2 text-3xl font-display num">${o.tantiemes ?? '—'}</div>
-      ${tantiemes_pct != null ? `<div class="mt-1 text-xs text-ink-500">${lang === 'en' ? `represented out of 10,000 (${tantiemes_pct.toFixed(2)} % of the copropriété)` : `représentés sur 10 000 (${tantiemes_pct.toFixed(2).replace('.', ',')} % de la copro)`}</div>` : ''}
+    <div class="bg-white shadow-card border hairline rounded-2xl p-6">
+      <div class="label-mono" style="color: var(--muted);">${L.tantiemes}</div>
+      <div class="mt-2 text-4xl font-display font-light num">${o.tantiemes ?? '—'}<span class="text-base text-ink-300"> / 10 000</span></div>
+      ${tantiemes_pct != null ? `<div class="mt-2 text-xs text-ink-500">${lang === 'en' ? `represented out of 10,000 (${tantiemes_pct.toFixed(2)} % of the copropriété)` : `représentés sur 10 000 (${tantiemes_pct.toFixed(2).replace('.', ',')} % de la copro)`}</div>` : ''}
     </div>
-    <div class="bg-white shadow-card rounded-xl p-5">
-      <div class="text-[11px] uppercase tracking-[0.18em] text-ink-500 font-semibold">${L.fonds}</div>
-      <div class="mt-2 text-3xl font-display num">${o.fonds_alur_eur != null ? fmtEUR(o.fonds_alur_eur, {fraction: 2}) : '—'}</div>
-      <div class="mt-1 text-xs text-ink-500">${lang === 'en' ? 'Your share, Annexe N°8' : 'Quote-part — Annexe N°8'}</div>
+    <div class="bg-white shadow-card border hairline rounded-2xl p-6">
+      <div class="label-mono" style="color: var(--muted);">${L.fonds}</div>
+      <div class="mt-2 text-3xl font-display font-light num">${o.fonds_alur_eur != null ? fmtEUR(o.fonds_alur_eur, {fraction: 2}) : '—'}</div>
+      <div class="mt-2 text-xs text-ink-500">${lang === 'en' ? 'Your share, Annexe N°8' : 'Quote-part — Annexe N°8'}</div>
     </div>
   `;
 
@@ -626,16 +727,16 @@
   const bal = data.owner?.balance_eur;
   let balanceHTML = '';
   if (bal == null) {
-    balanceHTML = `<div class="bg-mint-200/40 rounded-xl p-5 text-sm text-mint-700 border border-mint-200">
-      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${data.owner?.balance_note || L.balance_null}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
+      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${data.owner?.balance_note || L.balance_null}
     </div>`;
   } else if (bal > 0) {
-    balanceHTML = `<div class="bg-mint-200/40 rounded-xl p-5 text-sm text-mint-700 border border-mint-200">
-      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(bal, {fraction: 2})} ${lang === 'en' ? 'in your favor (créditeur)' : 'créditeur'}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(122,162,160,0.15); color: var(--accent-3); border-color: var(--accent-3);">
+      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(bal, {fraction: 2})} ${lang === 'en' ? 'in your favor (créditeur)' : 'créditeur'}
     </div>`;
   } else {
-    balanceHTML = `<div class="bg-rose-200/40 rounded-xl p-5 text-sm text-rose-700 border border-rose-200">
-      <strong>${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(Math.abs(bal), {fraction: 2})} ${lang === 'en' ? 'owed (débiteur)' : 'débiteur'}
+    balanceHTML = `<div class="rounded-2xl p-5 text-sm border" style="background: rgba(196,107,87,0.15); color: var(--rose-700, #A04B3A); border-color: var(--accent-2);">
+      <strong class="font-display italic">${lang === 'en' ? 'Balance:' : 'Solde :'}</strong> ${fmtEUR(Math.abs(bal), {fraction: 2})} ${lang === 'en' ? 'owed (débiteur)' : 'débiteur'}
     </div>`;
   }
   document.getElementById('owner-balance').innerHTML = balanceHTML;
@@ -643,8 +744,8 @@
   /* ----- footer ----- */
   const ing = data.source?.ingested_at || '';
   const pdfPages = data.source?.pdf_pages;
-  document.getElementById('footer-meta').textContent =
-    `${L.generated_from} ${ing}${pdfPages ? ` · ${pdfPages} ${L.pages}` : ''} · ag-copro v1.2`;
+  document.getElementById('footer-meta').innerHTML =
+    `<span style="color: var(--paper-dim);">${L.generated_from}</span> <span style="color: var(--accent);">${ing}</span>${pdfPages ? ` · ${pdfPages} ${L.pages}` : ''} · <span style="color: var(--paper-dim);">ag-copro</span> <span class="font-display italic" style="color: var(--accent);">v1.2</span>`;
 })();
 </script>
 </body>

@@ -170,18 +170,41 @@ Use `JSON.dumps(data, indent=2, ensure_ascii=False)` (Python) or equivalent — 
 ## Visual structure (for reference)
 
 ```
-Sticky top nav  ← hidden in print
-Hero            ← residence name + 4 KPI cards (meeting, deadline, budget, tantièmes)
-§1 Meeting      ← 2-card grid: details + vote-by-correspondence panel
-§2 Briefing     ← numbered "à retenir" list, color-coded by severity
+Sticky top nav  ← hidden in print, light paper bg, mark + monospace breadcrumb
+Hero            ← dark ink-950 band with champagne radial glow, residence
+                  name in serif italic accent, 4 KPI cards on translucent paper
+§1 Meeting      ← 2-card grid: light dl + dark "vote deadline" card with glow
+§2 Briefing     ← numbered "à retenir" list, color-coded by severity (rose/amber/teal)
 §3 Résolutions  ← donut chart + filter UI + interactive table (search, article toggles, hide procedural)
-§4 Budget       ← dark band: bar chart of totals + key-takeaway card + horizontal bar of top notable lines
-§5 Travaux      ← donut of paid vs outstanding + per-chantier progress cards (hidden if no travaux data)
-§6 Mon lot      ← 3 owner cards (identity, tantièmes, fonds ALUR) + balance badge
-Footer          ← generation date + disclaimer
+§4 Budget       ← dark band: bar chart of totals + key-takeaway card +
+                  horizontal bar of top notable lines, champagne accents on dark
+§5 Travaux      ← donut of paid vs outstanding + per-chantier progress cards
+                  (hidden if no travaux data)
+§6 Mon lot      ← 3 owner cards on paper bg + balance badge in teal/rose
+Footer          ← dark ink band, monospace meta + serif italic disclaimer
 ```
 
 The template auto-hides sections when their data is empty — e.g. an AG with no travaux yields no §5.
+
+## Design language
+
+The report uses the **warm filmic** palette of the logo-designer reference (Fraunces serif + Inter Tight sans + JetBrains Mono):
+
+- **Ink** `#0B0A08` / `#15120E` — hero, budget band, footer
+- **Paper** `#F4EFE6` / `#FAFAF7` — text on dark, page background
+- **Champagne** `#E9C38B` — primary accent (CTAs, italics, highlights)
+- **Amber-warm** `#D98B5F` — secondary accent (section labels, hover, italic display words)
+- **Teal** `#7AA2A0` — trust signal (privacy, balance créditeur, paid travaux)
+- **Rose** `#C46B57` — debit/overspend warnings
+
+Editorial flourishes lifted from the logo-designer brand-showcase:
+- Section titles follow the pattern `4. Le budget, *en clair.*` — last word italic in amber.
+- Section labels use `§ Budget` in monospace, uppercase, letter-spaced amber.
+- Hero residence name splits the last word into a serif italic in champagne.
+- Cards use `rounded-2xl`, subtle `box-shadow: 0 10px 40px -20px rgba(11,10,8,0.2)`, and a paper hairline border.
+- Dark cards over the ink band use `border: 1px solid rgba(244,239,230,0.22)` with translucent paper tint.
+
+When updating the JSON schema or rendering logic, keep the visual identity in sync: stick to the Tailwind utilities mapped above so utility-class swaps don't break the look. Chart.js color literals are mirrored in a single `COL = { ... }` object inside the template's `<script>` — update it there if you add chart types.
 
 ## Why JSON-in-HTML?
 
