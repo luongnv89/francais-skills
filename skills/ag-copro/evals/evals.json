@@ -4,45 +4,66 @@
     {
       "id": 1,
       "prompt": "J'ai reçu cette convocation d'AG : /Users/montimage/buildspace/luongnv89/francais-skills/resources/2-residence-du-verger-2026.pdf. Peux-tu me dire l'essentiel et ce à quoi je dois faire attention avant de voter ?",
-      "expected_output": "The skill ingests the PDF, writes a summary to ~/.ag-copro/summaries/le-verger-a-palaiseau-2026.md, then briefs the user with meeting date, vote-by-correspondence deadline, budget Y-o-Y, and a 5-bullet 'what to pay attention to' list.",
+      "expected_output": "The skill ingests the PDF, writes an interactive HTML report to the current working directory, then briefs the user with meeting date, vote-by-correspondence deadline, budget Y-o-Y, and a 3-5 bullet 'what to pay attention to' recap.",
       "files": [],
       "expectations": [
-        "A summary file is written to ~/.ag-copro/summaries/ matching the residence name and year 2026",
-        "The summary file frontmatter contains residence, meeting_date (2026-06-16), syndic ('IMMO DE FRANCE PARIS IDF'), and owner_tantiemes (233)",
+        "An HTML file is written to the current working directory matching the pattern ag-le-verger-a-palaiseau-2026.html (residence name and year 2026)",
+        "The HTML contains a <script type=\"application/json\" id=\"ag-data\"> block with a parseable JSON object",
+        "The embedded JSON has residence ('LE VERGER À PALAISEAU' or similar), meeting.date '2026-06-16', syndic containing 'IMMO DE FRANCE', and owner.tantiemes 233",
+        "The embedded JSON includes a budget object with n_plus_2_eur 57950 and delta_pct approximately 17.4",
+        "The embedded JSON has all 19 resolutions in the resolutions[] array, with Résolution 11 amount_eur 57950 and Résolution 16 amount_eur 350",
+        "The embedded JSON has a briefing[] array of 3-7 items with at least one high-severity item about the budget jump",
+        "The HTML loads Tailwind CSS (cdn.tailwindcss.com) and Chart.js (cdn.jsdelivr.net) via <script> tags",
+        "The HTML contains canvas elements for chart-budget, chart-resolutions, chart-lines, and chart-travaux",
         "The response identifies the meeting as 'mardi 16 juin 2026 à 19h00' at the Salle de réunion de la copropriété in Palaiseau",
-        "The response states the vote-by-correspondence deadline as 12/06/2026 (3 jours francs before the meeting)",
-        "The response highlights the budget jump from 49 350 € (N) to 57 950 € (N+2), approximately +17 %",
-        "The response flags the new 'salaires employé d'immeuble' line (~13 000 €) as a likely gardien hire to verify",
+        "The response states the vote-by-correspondence deadline as 12/06/2026",
+        "The response highlights the budget jump from 49 350 € to 57 950 € (approximately +17 %)",
         "The response flags Résolution 16 (350 € carrelage chez locataire) and Résolution 19 (bâches publicitaires) as unusual items worth attention",
-        "The response is in French because the question was in French"
+        "The response is in French because the question was in French and points the user at the HTML file"
       ]
     },
     {
       "id": 2,
       "prompt": "Here's my AG convocation: /Users/montimage/buildspace/luongnv89/francais-skills/resources/17-rue-philippe-de-dangeau-2025.pdf. When's the meeting, what's the budget, and what do I need to watch out for?",
-      "expected_output": "The skill ingests the VPàt Immo formatted PDF, writes a summary, and briefs the user in English (since the question is in English) while preserving French legal terms like 'syndic', 'travaux', 'tantièmes', 'Article 25'.",
+      "expected_output": "The skill ingests the VPàt Immo formatted PDF, writes an HTML report to the working directory with language='en' embedded JSON, and briefs the user in English while preserving French legal terms.",
       "files": [],
       "expectations": [
-        "A summary file is written to ~/.ag-copro/summaries/ matching the residence name (17-rue-philippe-de-dangeau) and year 2025",
-        "The summary frontmatter identifies the syndic as 'VPàt Immo' (or 'VPAT IMMO')",
+        "An HTML file is written to the current working directory matching ag-17-rue-philippe-de-dangeau-2025.html",
+        "The HTML contains a <script type=\"application/json\" id=\"ag-data\"> block with a parseable JSON object",
+        "The embedded JSON has language 'en' (matching the English question), syndic containing 'VPàt' or 'VPAT', and meeting.date '2025-05-14'",
+        "The embedded JSON has budget.n_plus_1_eur and budget.n_plus_2_eur both equal to 24000 (flat budget)",
+        "The embedded JSON has multiple travaux entries or résolutions tagged 'travaux' covering chemisage colonne d'eaux usées, remplacement tronçon fonte, and ravalement",
         "The response identifies the meeting as Wednesday 14 May 2025 at 18:00, 52 Rue Saint Charles in Versailles",
-        "The response identifies the budget as 24 000 € for both period N+1 (2025) and N+2 (2026), noting the budget is flat",
-        "The response flags the multiple travaux résolutions (chemisage colonne d'eaux usées, remplacement tronçon fonte fuyard, ravalement) and their respective amounts",
-        "The response flags Résolution 21 (convention d'honoraires de Maître COGNY for ~6 120 €) as a notable legal/procédural item",
+        "The response identifies the budget as 24 000 € for both periods (flat year over year)",
+        "The response flags Résolution 21 (convention d'honoraires de Maître COGNY for ~6 120 €) as a notable legal item",
         "The response is in English because the question was in English",
-        "French legal terms (syndic, travaux, tantièmes, Article 24/25) are preserved in italics or quotes rather than translated"
+        "French legal terms (syndic, travaux, tantièmes, Article 24/25) are preserved verbatim in italics or quotes rather than translated",
+        "The response tells the user to open the HTML file in their browser for the interactive report"
       ]
     },
     {
       "id": 3,
       "prompt": "/ag-copro",
-      "expected_output": "With no path argument and at least one previously-ingested summary in ~/.ag-copro/summaries/, the skill lists available summaries and asks the user which to load. If none exist, it asks for a PDF path.",
+      "expected_output": "With no path argument, the skill globs the current working directory for ag-*.html report files, lists any matches, and asks the user to pick one or provide a new PDF path. If none found in CWD, it may also offer to look at legacy ~/.ag-copro/summaries/*.md files.",
       "files": [],
       "expectations": [
         "The skill does NOT immediately try to ingest a PDF",
-        "The skill lists the files present in ~/.ag-copro/summaries/ (or states the directory is empty)",
-        "The skill asks the user to either pick an existing summary or provide a path to a new PDF",
+        "The skill globs the current working directory for files matching ag-*.html and lists them (or states the directory has no such files)",
+        "The skill asks the user to either pick an existing HTML report or provide a path to a new PDF",
         "The skill does not invent or hallucinate residences"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I already have ag-le-verger-a-palaiseau-2026.html in this folder — can you tell me which résolutions involve actual money?",
+      "expected_output": "The skill loads the existing HTML, extracts and parses the embedded JSON data block, then lists résolutions where amount_eur is not null. Does NOT re-read the source PDF.",
+      "files": [],
+      "expectations": [
+        "The skill reads the HTML file and extracts the <script type=\"application/json\" id=\"ag-data\"> block",
+        "The skill parses the JSON and filters resolutions where amount_eur is not null",
+        "The response lists at least Résolution 9 (syndic, 8 292,85 €), 10 (budget actualisé), 11 (budget 2027, 57 950 €), 15 (assistance, 384 €), 16 (carrelage, 350 €), 17 (persiennes, 2 000 €)",
+        "The skill does NOT re-read the source PDF",
+        "The skill cites résolution numbers"
       ]
     }
   ]

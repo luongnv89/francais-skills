@@ -1,6 +1,7 @@
 # Données personnelles — ne jamais publier
 resources/
 *.pdf
+ag-*.html
 
 # Caches / logs des agent runners (volatils, parfois sensibles)
 # On versionne .claude/, .codex/, .gemini/, .opencode/, .agents/ (wiring symlinks
